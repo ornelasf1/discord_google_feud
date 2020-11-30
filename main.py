@@ -1,6 +1,7 @@
 import os
 import random
 import time
+import sys
 
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -19,7 +20,7 @@ bot = commands.Bot(command_prefix='gfeud ',
 
 @bot.command(name='start', help='Starts a game of Google Feud')
 async def start_game(ctx):
-    searches_file = open('google_searches.txt', 'r')
+    searches_file = open(os.path.join(sys.path[0], 'google_searches.txt'), 'r')
     searches = searches_file.read().split('\n')
     search = random.choice(searches)
 

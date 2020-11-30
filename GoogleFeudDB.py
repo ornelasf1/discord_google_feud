@@ -1,8 +1,13 @@
 from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+MONGO_SERVER = os.getenv('MONGO_SERVER')
 
 class GoogleFeudDB:
     def __init__(self, guild, channel):
-        client = MongoClient('mongodb://localhost:27017/')
+        client = MongoClient(MONGO_SERVER)
         self.db = client.gfeuddb
         self.guild = guild
         self.channel = channel

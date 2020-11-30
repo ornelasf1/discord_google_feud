@@ -54,6 +54,7 @@ async def guess_phrase(ctx, phrase: str):
         await ctx.send(gfeud.getGFeudBoard())
 
         if gfeud.isGameOver():
+            gfeud.endGame()
             await ctx.send(gfeud.getWinnerResponse())
 
 @bot.command(name='scoreboard', help='Display scores for all players in this game session', no_category='Google Feud')

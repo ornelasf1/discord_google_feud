@@ -4,5 +4,8 @@ jobs:
     docker: 
       - image: cimg/base:2020.01
     steps:
-      - checkout
-      - run: ls -la
+      - run:
+        name: "Deploy app"
+        command: |
+          git pull origin master
+          sudo systemctl restart gfeud

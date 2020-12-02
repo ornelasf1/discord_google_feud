@@ -1,11 +1,12 @@
 version: 2.1
 jobs:
-  build:
+  deploy:
     docker: 
       - image: cimg/base:2020.01
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "c7:83:15:5e:8d:f3:72:0f:86:5d:6d:dd:3e:73:5b:b3"
       - run:
-        name: "Deploy app"
-        command: |
-          git pull origin master
-          sudo systemctl restart gfeud
+          name: "Deploy app"
+          command: ssh -o 'StrictHostKeyChecking no' gfeudadmin@104.43.167.136 git pull origin master

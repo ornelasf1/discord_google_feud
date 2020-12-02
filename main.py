@@ -16,7 +16,7 @@ help_command = commands.DefaultHelpCommand(
 
 bot = commands.Bot(command_prefix='gfeud ', 
     description='Google Feud is a game much like Family Feud, except the phrases on the wall are Google\'s auto-complete suggestions. Guess what the auto-completes they for a given phrase to win the game!', 
-    help_command=help_command)
+    help_command=help_command, case_insensitive=True)
 
 @bot.command(name='start', help='Starts a game of Google Feud')
 async def start_game(ctx):

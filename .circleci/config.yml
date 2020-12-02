@@ -9,4 +9,4 @@ jobs:
             - "c7:83:15:5e:8d:f3:72:0f:86:5d:6d:dd:3e:73:5b:b3"
       - run:
           name: "Deploy app"
-          command: ssh -o 'StrictHostKeyChecking no' gfeudadmin@104.43.167.136 cd discord_google_feud; git pull origin master
+          command: ssh -o 'StrictHostKeyChecking no' gfeudadmin@104.43.167.136 cd discord_google_feud; echo git pull origin master > test.txt

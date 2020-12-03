@@ -6,7 +6,7 @@ def logger(func):
         now = strftime("%a, %d %b %Y %I:%M:%S %p", localtime())
         try:
             ctx = args[0]
-            return func(f'[{now}][{ctx.guild}][{ctx.channel}][{ctx.author.display_name}][{ctx.author.id}]', *args, **kwargs)
+            return func(f'[{now}][{ctx.guild}][{ctx.channel}][{ctx.author.display_name}][{ctx.author.id}]', *args[1:], **kwargs)
         except:
             return func(now, *args,**kwargs)
     return new_print

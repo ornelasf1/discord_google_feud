@@ -86,11 +86,13 @@ class GoogleFeud:
             if not repeated:
                 cleaned_suggestions.append(reversed_suggestions[i])
 
+        reversed_suggestions.reverse()
         cleaned_suggestions.reverse()
 
         if len(cleaned_suggestions) == 0:
             self.gfeuddb.terminateSession()
-            raise RuntimeError("No suggestions to display for '" + self.phrase + "', Original suggestions: ", suggestions[1])
+            raise RuntimeError("No suggestions to display for '" + self.phrase + "', Original suggestions: ", 
+                suggestions[1], " Removed duplicates: ", reversed_suggestions)
 
 
         # Initializes game data and inserts into database

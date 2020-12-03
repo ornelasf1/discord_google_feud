@@ -21,12 +21,19 @@ bot = commands.Bot(command_prefix='gfeud ',
 @bot.command(name='start', help='Starts a game of Google Feud')
 async def start_game(ctx):
     searches_file = open(os.path.join(sys.path[0], 'google_searches.txt'), 'r')
-    searches = searches_file.read().split('\n')
-    search = random.choice(searches)
+    retryAttempts = 0
+    while retryAttempts < 5:
+        try:
+            searches = searches_file.read().split('\n')
+            search = random.choice(searches)
 
-    gfeud = GoogleFeud(ctx)
-    gfeud.loadSession()
-    gfeud.startGame(search)
+            gfeud = GoogleFeud(ctx)
+            gfeud.loadSession()
+            gfeud.startGame(search)
+            break
+        except error as RuntimeError:
+            print('Problem starting game: ', error)
+            retryAttempts += 1
         
     response = gfeud.getGFeudBoard()
 
@@ -67,29 +74,5 @@ async def scoreboard(ctx):
     else:
         await ctx.send(gfeud.getScoreboard())
 
-
-class DummyContext:
-    def __init__(self):
-        self.guild = 'my-guild'
-        self.channel = 'my-channel'
-        self.author = 'Defsin'
-        self.message = 'Why am I doing this?'
-
 if __name__ == "__main__":
-    # context = DummyContext()
-
-    # gfeud = GoogleFeud(context)
-    # gfeud.loadSession()
-    # gfeud.startGame("the universe is")
-    # time.sleep(2)
-    # print(gfeud.getGFeudBoard())
-    # time.sleep(5)
-
-    # print(gfeud.getGFeudBoard())
-    # print(gfeud.getScoreboard())
-    # print(gfeud.getWinnerResponse())
-    # if gfeud.isGameOver():
-    #     gfeud.endGame()
-    #     print('end game')
-
     bot.run(TOKEN)

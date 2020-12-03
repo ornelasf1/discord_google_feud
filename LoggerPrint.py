@@ -1,9 +1,12 @@
 
+from time import strftime, localtime
 
 def logger(func):
-    def new_print(ctx = None, *args, **kwargs):
-        if (ctx == None):
-            return func(*args,**kwargs)
-        else:
-            return func(f'[{ctx.guild}][{ctx.channel}][{ctx.author.display_name}][{ctx.author.id}]', *args, **kwargs)
+    def new_print(*args, **kwargs):
+        now = strftime("%a, %d %b %Y %I:%M:%S %p", localtime())
+        try:
+            ctx = args[0]
+            return func(f'[{now}][{ctx.guild}][{ctx.channel}][{ctx.author.display_name}][{ctx.author.id}]', *args, **kwargs)
+        except:
+            return func(now, *args,**kwargs)
     return new_print

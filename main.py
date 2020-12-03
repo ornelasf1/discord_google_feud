@@ -67,29 +67,5 @@ async def scoreboard(ctx):
     else:
         await ctx.send(gfeud.getScoreboard())
 
-
-class DummyContext:
-    def __init__(self):
-        self.guild = 'my-guild'
-        self.channel = 'my-channel'
-        self.author = 'Defsin'
-        self.message = 'Why am I doing this?'
-
 if __name__ == "__main__":
-    # context = DummyContext()
-
-    # gfeud = GoogleFeud(context)
-    # gfeud.loadSession()
-    # gfeud.startGame("the universe is")
-    # time.sleep(2)
-    # print(gfeud.getGFeudBoard())
-    # time.sleep(5)
-
-    # print(gfeud.getGFeudBoard())
-    # print(gfeud.getScoreboard())
-    # print(gfeud.getWinnerResponse())
-    # if gfeud.isGameOver():
-    #     gfeud.endGame()
-    #     print('end game')
-
     bot.run(TOKEN)

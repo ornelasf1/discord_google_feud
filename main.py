@@ -36,7 +36,7 @@ async def start_game(ctx):
             gfeud.loadSession()
             gfeud.startGame(search)
             break
-        except error as RuntimeError:
+        except RuntimeError as error:
             print(ctx, 'Problem starting game: ', error)
             retryAttempts += 1
         

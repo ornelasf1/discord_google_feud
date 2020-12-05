@@ -25,12 +25,14 @@ print = logger(print)
 async def start_game(ctx):
     searches_file = open(os.path.join(sys.path[0], 'google_searches.txt'), 'r')
     retryAttempts = 0
+    searches = searches_file.read().split('\n')
+    search = None
     while retryAttempts < 5:
         try:
-            searches = searches_file.read().split('\n')
             search = random.choice(searches)
 
-            print(ctx, f'Starting game with {search}')
+            if search is None:
+                raise RuntimeError('Random phrase is undefined')
 
             gfeud = GoogleFeud(ctx)
             gfeud.loadSession()

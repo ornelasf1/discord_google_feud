@@ -3,9 +3,13 @@ import requests
 import json
 from fake_useragent import UserAgent
 from GoogleFeudDB import GoogleFeudDB
+from LoggerPrint import logger
+
+print = logger(print)
 
 class GoogleFeud:
     def __init__(self, ctx):
+        self.ctx = ctx
         self.gfeuddb = GoogleFeudDB(str(ctx.guild), str(ctx.channel))
         self.guild = ctx.guild
         self.channel = ctx.channel
@@ -20,6 +24,7 @@ class GoogleFeud:
         """
         session = self.gfeuddb.getSession()
         if session == None:
+            print(self.ctx, f'Starting game with {phrase}')
             self.gfeuddb.createSession()
             self.gfeuddb.updatePhrase(phrase)
             self.phrase = phrase

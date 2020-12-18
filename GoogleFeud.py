@@ -59,15 +59,16 @@ class GoogleFeud:
         headers = {"user-agent": ua.chrome}
         response = requests.get(url, headers=headers, verify=False)
         suggestions = json.loads(response.text)
+        lower_phrase = self.phrase.lower()
         
         # Removes the first section of the sentence where the phrase begins from every auto-complete suggestion.
         # Don't include suggestions where the phrase is not found and cutting off the first section results in the empty string.
         # e.g. suggestion = 'people are strange', phrase = 'people are' -> cleaned_suggestion = 'strange'
         cleaned_suggestions = [
-            suggestion[suggestion.find(self.phrase) + len(self.phrase):].strip() 
+            suggestion[suggestion.find(lower_phrase) + len(lower_phrase):].strip() 
                 for suggestion in suggestions[1] 
-                    if suggestion.find(self.phrase) != -1 and 
-                        len(suggestion[suggestion.find(self.phrase) + len(self.phrase):].strip()) > 0
+                    if suggestion.find(lower_phrase) != -1 and 
+                        len(suggestion[suggestion.find(lower_phrase) + len(lower_phrase):].strip()) > 0
             ]
 
         # Removes duplicate words from every suggestion.

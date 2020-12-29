@@ -150,7 +150,8 @@ class GoogleFeud:
         """
         guesser = str(member.display_name)
         for i, suggestion in enumerate(self.suggestions):
-            if suggestion.find(guess) != -1 and not self.suggestions[suggestion]['solved']:
+            foundMatch = self.isGuessInPhrase(guess, suggestion)
+            if foundMatch and not self.suggestions[suggestion]['solved']:
                 self.suggestions[suggestion]['solved'] = True
                 self.suggestions[suggestion]['solvedBy'] = guesser
                 if not guesser in self.scores:
@@ -162,12 +163,19 @@ class GoogleFeud:
                 self.gfeuddb.updateSuggestionSolved(suggestion, guesser)
                 self.statusMessage = f":clap:  Great answer, {guesser}! {self.suggestions[suggestion]['score']} points for you  :partying_face:"
                 return True
-            elif suggestion.find(guess) != -1 and self.suggestions[suggestion]['solved']:
-                self.statusMessage = f"Answer with the phrase '***{guess}***' has already been given  :face_with_symbols_over_mouth:"
+            elif foundMatch and self.suggestions[suggestion]['solved']:
+                self.statusMessage = f"Answer with the phrase *{guess}* has already been given  :face_with_symbols_over_mouth:"
                 return True
         
-        self.statusMessage = f"No auto-complete found with the phrase, ***{guess}*** :sweat:"
+        self.statusMessage = f"No auto-complete found with the phrase, *{guess}*  :sweat:"
         return False
+
+    def isGuessInPhrase(self, guess, suggestion):
+        """
+        Checks if the given word matches any of the words in the auto-complete and checks
+        if the player is trying to pull a sneaky by giving a generic word
+        """
+        return guess in [word for word in suggestion.split()] and not guess in ['a', 'the', 'of', 'by']
 
     def isGameOver(self):
         for suggestion in self.suggestions:

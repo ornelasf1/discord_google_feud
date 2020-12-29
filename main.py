@@ -75,7 +75,7 @@ async def guess_phrase(ctx, phrase: str):
         response = ">>> Game has not started :bangbang:\nStart a game with `gfeud start`"
         await ctx.send(response)
     else:
-        print(ctx, f'Check if "{phrase} is in auto-complete sentence"')
+        print(ctx, f'Check if "{phrase}" is in auto-complete sentence')
         gfeud.checkPhraseInSuggestions(phrase, ctx.author)
         await ctx.send(gfeud.getGFeudBoard())
 

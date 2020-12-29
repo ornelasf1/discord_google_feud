@@ -17,7 +17,7 @@ help_command = commands.DefaultHelpCommand(
 )
 
 bot = commands.Bot(command_prefix='gfeud ', 
-    description='Google Feud is a game much like Family Feud, except the phrases on the wall are Google\'s auto-complete suggestions. Guess what the auto-completes they for a given phrase to win the game!', 
+    description='Google Feud is a game much like Family Feud, except the phrases on the wall are Google\'s auto-complete suggestions. Guess what the auto-completes are for a given phrase to win the game!', 
     help_command=help_command, case_insensitive=True)
 
 print = logger(print)

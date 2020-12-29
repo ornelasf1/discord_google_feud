@@ -4,6 +4,7 @@ import time
 import sys
 
 from discord.ext import commands
+from discord.ext.commands import CommandNotFound
 from dotenv import load_dotenv
 from GoogleFeud import GoogleFeud
 from LoggerPrint import logger
@@ -85,6 +86,15 @@ async def scoreboard(ctx):
         await ctx.send(response)
     else:
         await ctx.send(gfeud.getScoreboard())
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, CommandNotFound):
+        print(ctx, error)
+        response = ">>> Unknown command. Run **gfeud help** for valid commands"
+        await ctx.send(response)
+        return
+    raise error
 
 if __name__ == "__main__":
     bot.run(TOKEN)

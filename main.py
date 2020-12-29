@@ -2,6 +2,7 @@ import os
 import random
 import time
 import sys
+import discord
 
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
@@ -21,6 +22,11 @@ bot = commands.Bot(command_prefix='gfeud ',
     help_command=help_command, case_insensitive=True)
 
 print = logger(print)
+
+@bot.event
+async def on_ready():
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="gfeud help"))
+    print('Beep Boop I am ready to serve the humans.')
 
 @bot.command(name='start', help='Starts a game of Google Feud')
 async def start_game(ctx):

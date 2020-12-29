@@ -5,7 +5,7 @@ import sys
 import discord
 
 from discord.ext import commands
-from discord.ext.commands import CommandNotFound
+from discord.ext.commands import CommandNotFound, MissingRequiredArgument
 from dotenv import load_dotenv
 from GoogleFeud import GoogleFeud
 from LoggerPrint import logger
@@ -97,9 +97,19 @@ async def scoreboard(ctx):
 async def on_command_error(ctx, error):
     if isinstance(error, CommandNotFound):
         print(ctx, error)
-        response = ">>> Unknown command. Run **gfeud help** for valid commands"
+        response = ">>> Unknown command  :grimacing: Run `gfeud help` for valid commands"
         await ctx.send(response)
         return
+
+    if isinstance(error, MissingRequiredArgument):
+        print(ctx, error)
+        if "phrase" == error.param.name:
+            response = ">>> Provide a phrase with that command  :wink:\n.e.g `gfeud a <phrase>`"
+        else:
+            response = f">>> Unknown command {error.param.name}. Run `gfeud help` for valid commands"
+        await ctx.send(response)
+        return
+
     raise error
 
 if __name__ == "__main__":

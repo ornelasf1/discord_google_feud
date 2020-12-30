@@ -173,9 +173,11 @@ class GoogleFeud:
                 print(self.ctx, f"'{guess}' was already guessed correctly before")
                 self.statusMessage = f"Answer with the phrase *{guess}* has already been given  :face_with_symbols_over_mouth:"
                 self.gfeuddb.updateTurn()
+                self.turns -= 1
                 return True
         print(self.ctx, f"'{guess}' did not match any auto-completes")
         self.gfeuddb.updateTurn()
+        self.turns -= 1
         self.statusMessage = f"No auto-complete found with the phrase, *{guess}*  :sweat:"
         return False
 
@@ -210,9 +212,10 @@ class GoogleFeud:
                     break
         plurar_winner_label = "Winners" if len(winners) > 1 else "Winner"
         winners = " - ".join(list(winners.keys()))
-        return f"""
->>> **{plurar_winner_label}** {winners} :fireworks: :100:
-        """
+        if len(winners) == 0:
+            return f">>> **No winners here**  :cloud_rain:"
+        else:
+            return f">>> **{plurar_winner_label}** {winners}  :fireworks: :100:"
 
 
     def getScoreboard(self):

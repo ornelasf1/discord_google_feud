@@ -184,9 +184,9 @@ class GoogleFeud:
     def isGuessInPhrase(self, guess, suggestion):
         """
         Checks if the given word matches any of the words in the auto-complete and checks
-        if the player is trying to pull a sneaky by giving a generic word
+        if the player is trying to pull a sneaky by giving a meaningless word
         """
-        return guess in [word for word in suggestion.split()] and not guess in ['a', 'the', 'of', 'by', 'so', 'too']
+        return guess in [word for word in suggestion.split()] and not guess in ['a', 'the', 'of', 'by', 'so', 'too', 'your']
 
     def isGameOver(self):
         if self.turns <= 0:

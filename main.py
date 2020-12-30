@@ -69,13 +69,13 @@ async def end_game(ctx):
 
 @bot.command(name='a', help='Provide your auto-complete guess')
 async def guess_phrase(ctx, phrase: str):
-    gfeud = GoogleFeud(ctx)
-    if not gfeud.loadSession():
-        print(ctx, f'Game hasn\'t started yet')
-        response = ">>> Game has not started :bangbang:\nStart a game with `gfeud start`"
-        await ctx.send(response)
-    else:
-        try:
+    try:
+        gfeud = GoogleFeud(ctx)
+        if not gfeud.loadSession():
+            print(ctx, f'Game hasn\'t started yet')
+            response = ">>> Game has not started :bangbang:\nStart a game with `gfeud start`"
+            await ctx.send(response)
+        else:
             print(ctx, f'Check if "{phrase}" is in auto-complete sentence')
             gfeud.checkPhraseInSuggestions(phrase, ctx.author)
             await ctx.send(gfeud.getGFeudBoard())
@@ -84,9 +84,9 @@ async def guess_phrase(ctx, phrase: str):
                 print(ctx, f'Game over')
                 gfeud.endGame()
                 await ctx.send(gfeud.getWinnerResponse())
-        except:
-            gfeud.endGame()
-            await ctx.send('Our bad, something might\'ve broken  :confounded:')
+    except:
+        gfeud.endGame()
+        await ctx.send('>>> Our bad, something might\'ve broken  :confounded:')
 
 @bot.command(name='scoreboard', help='Display scores for all players in this game session', no_category='Google Feud')
 async def scoreboard(ctx):

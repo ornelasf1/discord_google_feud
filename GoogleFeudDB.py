@@ -22,7 +22,8 @@ class GoogleFeudDB:
                 'channel' : self.channel,
                 'phrase' : str(),
                 'scores' : dict(),
-                'suggestions' : dict()
+                'suggestions' : dict(),
+                'turns' : 5
             }
             # suggestions contains objects with the following shape
             # <suggestion_phrase>: Object
@@ -130,3 +131,18 @@ class GoogleFeudDB:
                 solvedBy_suggestion)
         except Exception as error:
             print('Failed to update suggestion: ', error)
+    
+    def updateTurn(self):
+        """
+        Update turn count by decrementing turn value.
+        """
+        try:
+            new_turn = {
+                "turns" : -1
+            }
+
+            result = self.db.sessions.update_one(
+                { "guild" : self.guild, "channel" : self.channel }, 
+                { "$inc" : new_turn })
+        except Exception as error:
+            print('Failed update the turns for this session: ', error)

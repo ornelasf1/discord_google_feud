@@ -17,6 +17,7 @@ class GoogleFeud:
         self.suggestions = {}
         self.scores = {}
         self.statusMessage = ""
+        self.turns = 0
 
     def startGame(self, phrase):
         """
@@ -24,11 +25,12 @@ class GoogleFeud:
         """
         session = self.gfeuddb.getSession()
         if session == None:
-            print(self.ctx, f'Starting game with {phrase}')
+            print(self.ctx, f"Starting game with '{phrase}'")
             self.gfeuddb.createSession()
             self.gfeuddb.updatePhrase(phrase)
             self.phrase = phrase
             self.fetchSuggestions()
+            self.turns = 5
         else:
             self.statusMessage = "Game is in progress!"
 
@@ -119,6 +121,7 @@ class GoogleFeud:
             self.scores = session['scores']
             self.suggestions = session['suggestions']
             self.phrase = session['phrase']
+            self.turns = session['turns']
             return True
         else:
             return False
@@ -141,6 +144,8 @@ class GoogleFeud:
             else:
                 board += f'\n{getEmojiNumber(rank, True)}  **{self.phrase} {key}** | Solved By: *{self.suggestions[key]["solvedBy"]}* {getEmojiScore(self.suggestions[key]["score"])}'
             rank += 1
+        if not self.turns == 5:
+            board += '\n\n' + getTurnText(self.turns)
         return board
 
     def checkPhraseInSuggestions(self, guess, member):
@@ -152,6 +157,7 @@ class GoogleFeud:
         for i, suggestion in enumerate(self.suggestions):
             foundMatch = self.isGuessInPhrase(guess, suggestion)
             if foundMatch and not self.suggestions[suggestion]['solved']:
+                print(self.ctx, f"'{guess}' was correct, it matched '{suggestion}'")
                 self.suggestions[suggestion]['solved'] = True
                 self.suggestions[suggestion]['solvedBy'] = guesser
                 if not guesser in self.scores:
@@ -164,9 +170,12 @@ class GoogleFeud:
                 self.statusMessage = f":clap:  Great answer, {guesser}! {self.suggestions[suggestion]['score']} points for you  :partying_face:"
                 return True
             elif foundMatch and self.suggestions[suggestion]['solved']:
+                print(self.ctx, f"'{guess}' was already guessed correctly before")
                 self.statusMessage = f"Answer with the phrase *{guess}* has already been given  :face_with_symbols_over_mouth:"
+                self.gfeuddb.updateTurn()
                 return True
-        
+        print(self.ctx, f"'{guess}' did not match any auto-completes")
+        self.gfeuddb.updateTurn()
         self.statusMessage = f"No auto-complete found with the phrase, *{guess}*  :sweat:"
         return False
 
@@ -178,6 +187,9 @@ class GoogleFeud:
         return guess in [word for word in suggestion.split()] and not guess in ['a', 'the', 'of', 'by']
 
     def isGameOver(self):
+        if self.turns <= 0:
+            return True
+
         for suggestion in self.suggestions:
             autocomplete = self.suggestions[suggestion]
             if not autocomplete['solved']:
@@ -258,3 +270,12 @@ def getEmojiNumber(number, fill=False):
 
 def green(text, append = ""):
     return f"```css\n{text}{append}\n```"
+
+def getTurnText(turn):
+    turn_text = f'{turn} {"turns" if turn > 1 else "turn"} left'
+    if turn > 3:
+        return f'**{turn_text}**'
+    elif turn > 1:
+        return f'***{turn_text}***'
+    else:
+        return f'__***{turn_text}***__'

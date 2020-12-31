@@ -78,12 +78,14 @@ async def guess_phrase(ctx, phrase: str):
         else:
             print(ctx, f'Check if "{phrase}" is in auto-complete sentence')
             gfeud.checkPhraseInSuggestions(phrase, ctx.author)
-            await ctx.send(gfeud.getGFeudBoard())
 
             if gfeud.isGameOver():
                 print(ctx, f'Game over')
                 gfeud.endGame()
+                await ctx.send(gfeud.getGFeudBoard())
                 await ctx.send(gfeud.getWinnerResponse())
+            else:
+                await ctx.send(gfeud.getGFeudBoard())
     except:
         gfeud.endGame()
         await ctx.send('>>> Our bad, something might\'ve broken  :confounded:')

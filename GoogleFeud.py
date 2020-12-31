@@ -18,6 +18,7 @@ class GoogleFeud:
         self.scores = {}
         self.statusMessage = ""
         self.turns = 0
+        self.game_ended = False
 
     def startGame(self, phrase):
         """
@@ -31,6 +32,7 @@ class GoogleFeud:
             self.phrase = phrase
             self.fetchSuggestions()
             self.turns = 5
+            print(self.ctx, 'Auto-completes to guess: ' + ", ".join(list(self.suggestions.keys())))
         else:
             self.statusMessage = "Game is in progress!"
 
@@ -39,6 +41,7 @@ class GoogleFeud:
         Deletes the game session
         """
         result = self.gfeuddb.terminateSession()
+        self.game_ended = True
         return result.deleted_count > 0
 
 
@@ -139,8 +142,10 @@ class GoogleFeud:
         for key in self.suggestions:
             if rank > 10:
                 break
-            if not self.suggestions[key]['solved']:
+            if not self.suggestions[key]['solved'] and not self.game_ended:
                 board += '\n' + getEmojiNumber(rank, True) + '  ' + (':small_orange_diamond::small_blue_diamond:' * 4)
+            elif not self.suggestions[key]['solved'] and self.game_ended:
+                board += f'\n{getEmojiNumber(rank, True)}  {self.phrase} {key}'
             else:
                 board += f'\n{getEmojiNumber(rank, True)}  **{self.phrase} {key}** | Solved By: *{self.suggestions[key]["solvedBy"]}* {getEmojiScore(self.suggestions[key]["score"])}'
             rank += 1

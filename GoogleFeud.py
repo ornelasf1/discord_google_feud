@@ -7,6 +7,8 @@ from LoggerPrint import logger
 
 print = logger(print)
 
+meaningless_phrases = ['a', 'the', 'of', 'by', 'so', 'too', 'your', 'me', 'my']
+
 class GoogleFeud:
     def __init__(self, ctx):
         self.ctx = ctx
@@ -60,7 +62,7 @@ class GoogleFeud:
             raise RuntimeError("Session has not been created")
 
         question = self.phrase.replace(" ", "+")
-        url = "http://suggestqueries.google.com/complete/search?output=firefox&q=" + question
+        url = "http://suggestqueries.google.com/complete/search?output=firefox&q=" + question + "+ "
         ua = UserAgent()
         headers = {"user-agent": ua.chrome}
         response = requests.get(url, headers=headers, verify=False)
@@ -80,6 +82,7 @@ class GoogleFeud:
         # Removes duplicate words from every suggestion.
         # It is reversed to remove the least important suggestions first
         # If a duplicate word is found when comparing two suggestions, immediately filter out the suggestion
+        # If the word that is duplicated is something like 'a', 'of', 'the', then don't remove it.
         # e.g. Comparing 10.'cool cats' and 9.'cool', 'cool cats' is removed because 'cool' = 'cool' and 9 has higher priority than 10
         reversed_suggestions = cleaned_suggestions[:]
         reversed_suggestions.reverse()
@@ -92,7 +95,7 @@ class GoogleFeud:
                 for word_1 in reversed_suggestions[i].split(" "):
                     if repeated: break
                     for word_2 in reversed_suggestions[j].split(" "):
-                        if (word_1 == word_2):
+                        if (word_1 == word_2 and not word_1 in meaningless_phrases):
                             repeated = True
                             break
             if not repeated:
@@ -192,7 +195,7 @@ class GoogleFeud:
         Checks if the given word matches any of the words in the auto-complete and checks
         if the player is trying to pull a sneaky by giving a meaningless word
         """
-        return guess in [word for word in suggestion.split()] and not guess in ['a', 'the', 'of', 'by', 'so', 'too', 'your']
+        return guess in [word for word in suggestion.split()] and not guess in meaningless_phrases
 
     def isGameOver(self):
         if self.turns <= 0:

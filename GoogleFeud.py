@@ -20,12 +20,13 @@ class GoogleFeud:
         self.turns = 0
         self.game_ended = False
 
-    def startGame(self, phrase):
+    def startGame(self):
         """
         Creates a game session in db if it doesn't exist
         """
         session = self.gfeuddb.getSession()
         if session == None:
+            phrase = self.gfeuddb.getGoogleSearchPhrase()
             print(self.ctx, f"Starting game with '{phrase}'")
             self.gfeuddb.createSession()
             self.gfeuddb.updatePhrase(phrase)

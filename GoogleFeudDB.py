@@ -146,3 +146,17 @@ class GoogleFeudDB:
                 { "$inc" : new_turn })
         except Exception as error:
             print('Failed update the turns for this session: ', error)
+
+    def getGoogleSearchPhrase(self):
+        """
+        Returns a random Google search phrase string.
+        Connect to MongoDB server to add/remove phrases.
+        """
+        try:
+            search_phrase = self.db.searchphrases.aggregate([{'$sample':{'size':1}}])
+            # Aggregate returns list of objects. We only need the first random sample
+            for phrase in search_phrase:
+                return phrase['phrase']
+
+        except Exception as error:
+            print('Failed to fetch search phrase: ', error)

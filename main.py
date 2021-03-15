@@ -35,18 +35,17 @@ async def start_game(ctx):
     searches = searches_file.read().split('\n')
     search = None
     while retryAttempts < 5:
-        try:
+    try:
             search = random.choice(searches)
 
             if search is None:
                 raise RuntimeError('Random phrase is undefined')
 
-            gfeud = GoogleFeud(ctx)
-            gfeud.loadSession()
-            gfeud.startGame(search)
-            break
-        except RuntimeError as error:
-            print(ctx, 'Problem starting game: ', error)
+        gfeud = GoogleFeud(ctx)
+        gfeud.loadSession()
+        gfeud.startGame()
+    except RuntimeError as error:
+        print(ctx, 'Problem starting game: ', error)
             retryAttempts += 1
         
     response = gfeud.getGFeudBoard()

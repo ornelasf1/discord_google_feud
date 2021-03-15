@@ -1,7 +1,5 @@
 import os
-import random
 import time
-import sys
 import discord
 
 from discord.ext import commands
@@ -17,7 +15,7 @@ help_command = commands.DefaultHelpCommand(
     no_category = 'Google Feud'
 )
 
-bot = commands.Bot(command_prefix='gfeud ', 
+bot = commands.Bot(command_prefix=['gfeud ', 'gf ', 'Gf ', 'gF ', 'GF '], 
     description='Google Feud is a game much like Family Feud, except the phrases on the wall are Google\'s auto-complete suggestions. Guess what the auto-completes are for a given phrase to win the game!', 
     help_command=help_command, case_insensitive=True)
 
@@ -25,28 +23,17 @@ print = logger(print)
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="gfeud help"))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="gf help"))
     print('Beep Boop I am ready to serve the humans.')
 
 @bot.command(name='start', help='Starts a game of Google Feud')
 async def start_game(ctx):
-    searches_file = open(os.path.join(sys.path[0], 'google_searches.txt'), 'r')
-    retryAttempts = 0
-    searches = searches_file.read().split('\n')
-    search = None
-    while retryAttempts < 5:
     try:
-            search = random.choice(searches)
-
-            if search is None:
-                raise RuntimeError('Random phrase is undefined')
-
         gfeud = GoogleFeud(ctx)
         gfeud.loadSession()
         gfeud.startGame()
     except RuntimeError as error:
         print(ctx, 'Problem starting game: ', error)
-            retryAttempts += 1
         
     response = gfeud.getGFeudBoard()
 
@@ -59,10 +46,10 @@ async def end_game(ctx):
         
     if gfeud.endGame():
         print(ctx, f'Ended game successfully')
-        response = ">>> Ended the game :ok_hand:\nStart again with `gfeud start`"
+        response = ">>> Ended the game :ok_hand:\nStart again with `gf start`"
     else:
         print(ctx, f'No game to end')
-        response = ">>> Game is not in progress :confused:\nStart a game with `gfeud start`"
+        response = ">>> Game is not in progress :confused:\nStart a game with `gf start`"
 
     await ctx.send(response)
 
@@ -72,7 +59,7 @@ async def guess_phrase(ctx, phrase: str):
         gfeud = GoogleFeud(ctx)
         if not gfeud.loadSession():
             print(ctx, f'Game hasn\'t started yet')
-            response = ">>> Game has not started :bangbang:\nStart a game with `gfeud start`"
+            response = ">>> Game has not started :bangbang:\nStart a game with `gf start`"
             await ctx.send(response)
         else:
             print(ctx, f'Check if "{phrase}" is in auto-complete sentence')
@@ -93,7 +80,7 @@ async def guess_phrase(ctx, phrase: str):
 async def scoreboard(ctx):
     gfeud = GoogleFeud(ctx)
     if not gfeud.loadSession():
-        response = ">>> Game has not started :bangbang:\nStart a game with `gfeud start`"
+        response = ">>> Game has not started :bangbang:\nStart a game with `gf start`"
         await ctx.send(response)
     else:
         await ctx.send(gfeud.getScoreboard())
@@ -102,16 +89,16 @@ async def scoreboard(ctx):
 async def on_command_error(ctx, error):
     if isinstance(error, CommandNotFound):
         print(ctx, error)
-        response = ">>> Unknown command  :grimacing: Run `gfeud help` for valid commands"
+        response = ">>> Unknown command  :grimacing: Run `gf help` for valid commands"
         await ctx.send(response)
         return
 
     if isinstance(error, MissingRequiredArgument):
         print(ctx, error)
         if "phrase" == error.param.name:
-            response = ">>> Provide a phrase with that command  :wink:\n.e.g `gfeud a <phrase>`"
+            response = ">>> Provide a phrase with that command  :wink:\n.e.g `gf a <phrase>`"
         else:
-            response = f">>> Unknown command {error.param.name}. Run `gfeud help` for valid commands"
+            response = f">>> Unknown command {error.param.name}. Run `gf help` for valid commands"
         await ctx.send(response)
         return
 

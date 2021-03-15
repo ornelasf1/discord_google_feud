@@ -136,7 +136,7 @@ class GoogleFeud:
             message = "\n**" + self.statusMessage + "**"
 
         board = f"""
->>> **Google Feud** - How does Google autocomplete this:question: Do `gfeud a <your-guess>`
+>>> **Google Feud** - How does Google autocomplete this:question: Do `gf a <your-guess>`
 {green(self.phrase, ' ...')}{message}
         """
         rank = 1

@@ -5,8 +5,8 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound, MissingRequiredArgument
 from dotenv import load_dotenv
-from GoogleFeud import GoogleFeud
-from LoggerPrint import logger
+from googlefeud.GoogleFeud import GoogleFeud
+from googlefeud.LoggerPrint import logger
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')

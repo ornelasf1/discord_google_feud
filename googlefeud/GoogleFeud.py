@@ -2,8 +2,8 @@
 import requests
 import json
 from fake_useragent import UserAgent
-from GoogleFeudDB import GoogleFeudDB
-from LoggerPrint import logger
+from googlefeud.GoogleFeudDB import GoogleFeudDB
+from googlefeud.LoggerPrint import logger
 
 print = logger(print)
 

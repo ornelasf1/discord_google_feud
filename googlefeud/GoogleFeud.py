@@ -47,6 +47,58 @@ class GoogleFeud:
         self.game_ended = True
         return result.deleted_count > 0
 
+    def _get_suggestions_response(self, phrase):
+        question = phrase.replace(" ", "+")
+        url = "http://suggestqueries.google.com/complete/search?output=firefox&q=" + question + "+ "
+        ua = UserAgent()
+        headers = {"user-agent": ua.chrome}
+        response = requests.get(url, headers=headers, verify=False)
+        suggestions = json.loads(response.text)
+        lower_phrase = phrase.lower()
+        return (lower_phrase, suggestions)
+
+    def _trim_suggestions(self, lower_phrase, suggestions):
+        """
+        Removes the first section of the sentence where the phrase begins from every auto-complete suggestion.
+        Don't include suggestions where the phrase is not found and cutting off the first section results in the empty string.
+        e.g. suggestion = 'people are strange', phrase = 'people are' -> cleaned_suggestion = 'strange'
+        """
+        return [
+            suggestion[suggestion.find(lower_phrase) + len(lower_phrase):].strip() 
+                for suggestion in suggestions[1] 
+                    if suggestion.find(lower_phrase) != -1 and 
+                        len(suggestion[suggestion.find(lower_phrase) + len(lower_phrase):].strip()) > 0
+            ]
+    
+    def _remove_duplicates_from_suggestions(self, cleaned_suggestions):
+        """
+        Removes duplicate words from every suggestion.
+        It is reversed to remove the least important suggestions first
+        If a duplicate word is found when comparing two suggestions, immediately filter out the suggestion
+        If the word that is duplicated is something like 'a', 'of', 'the', then don't remove it.
+        e.g. Comparing 10.'cool cats' and 9.'cool', 'cool cats' is removed because 'cool' = 'cool' and 9 has higher priority than 10
+        """
+        reversed_suggestions = cleaned_suggestions[:]
+        reversed_suggestions.reverse()
+        new_cleaned_suggestions = []
+
+        for i in range(len(reversed_suggestions)):
+            repeated = False
+            for j in range(i + 1, len(reversed_suggestions)):
+                if repeated: break
+                for word_1 in reversed_suggestions[i].split(" "):
+                    if repeated: break
+                    for word_2 in reversed_suggestions[j].split(" "):
+                        if (word_1 == word_2 and not word_1 in meaningless_phrases):
+                            repeated = True
+                            break
+            if not repeated:
+                new_cleaned_suggestions.append(reversed_suggestions[i])
+
+        reversed_suggestions.reverse()
+        new_cleaned_suggestions.reverse()
+
+        return (new_cleaned_suggestions, reversed_suggestions)
 
     def fetchSuggestions(self):
         """
@@ -61,48 +113,11 @@ class GoogleFeud:
         if session == None:
             raise RuntimeError("Session has not been created")
 
-        question = self.phrase.replace(" ", "+")
-        url = "http://suggestqueries.google.com/complete/search?output=firefox&q=" + question + "+ "
-        ua = UserAgent()
-        headers = {"user-agent": ua.chrome}
-        response = requests.get(url, headers=headers, verify=False)
-        suggestions = json.loads(response.text)
-        lower_phrase = self.phrase.lower()
+        lower_phrase, suggestions = self._get_suggestions_response(self.phrase)
         
-        # Removes the first section of the sentence where the phrase begins from every auto-complete suggestion.
-        # Don't include suggestions where the phrase is not found and cutting off the first section results in the empty string.
-        # e.g. suggestion = 'people are strange', phrase = 'people are' -> cleaned_suggestion = 'strange'
-        cleaned_suggestions = [
-            suggestion[suggestion.find(lower_phrase) + len(lower_phrase):].strip() 
-                for suggestion in suggestions[1] 
-                    if suggestion.find(lower_phrase) != -1 and 
-                        len(suggestion[suggestion.find(lower_phrase) + len(lower_phrase):].strip()) > 0
-            ]
+        cleaned_suggestions = self._trim_suggestions(lower_phrase, suggestions)
 
-        # Removes duplicate words from every suggestion.
-        # It is reversed to remove the least important suggestions first
-        # If a duplicate word is found when comparing two suggestions, immediately filter out the suggestion
-        # If the word that is duplicated is something like 'a', 'of', 'the', then don't remove it.
-        # e.g. Comparing 10.'cool cats' and 9.'cool', 'cool cats' is removed because 'cool' = 'cool' and 9 has higher priority than 10
-        reversed_suggestions = cleaned_suggestions[:]
-        reversed_suggestions.reverse()
-        cleaned_suggestions = []
-
-        for i in range(len(reversed_suggestions)):
-            repeated = False
-            for j in range(i + 1, len(reversed_suggestions)):
-                if repeated: break
-                for word_1 in reversed_suggestions[i].split(" "):
-                    if repeated: break
-                    for word_2 in reversed_suggestions[j].split(" "):
-                        if (word_1 == word_2 and not word_1 in meaningless_phrases):
-                            repeated = True
-                            break
-            if not repeated:
-                cleaned_suggestions.append(reversed_suggestions[i])
-
-        reversed_suggestions.reverse()
-        cleaned_suggestions.reverse()
+        cleaned_suggestions, reversed_suggestions = self._remove_duplicates_from_suggestions(cleaned_suggestions)
 
         if len(cleaned_suggestions) == 0:
             self.gfeuddb.terminateSession()
@@ -238,6 +253,39 @@ class GoogleFeud:
             scoreboard += "No one has guessed right :rofl:"
 
         return scoreboard
+
+    def isUserAnAdmin(self):
+        """
+        Returns True if the user is an Admin, otherwise return False
+        """
+        return self.gfeuddb.checkIfUserIsAdmin(self.ctx.author)
+
+    def showSuggestionsOfCandidatePhrase(self, phrase):
+        """
+        Returns a list of suggestions for the given phrase.
+        The suggestions are curated by trimming down suggestions and removing duplicates
+        """
+        if self.gfeuddb.checkIfSearchPhraseExists(phrase):
+            return None
+
+        lower_phrase, suggestions = self._get_suggestions_response(phrase)
+        
+        cleaned_suggestions = self._trim_suggestions(lower_phrase, suggestions)
+
+        cleaned_suggestions, reversed_suggestions = self._remove_duplicates_from_suggestions(cleaned_suggestions)
+
+        message = f'>>> The phrase **{phrase}** will display the following suggestions\n'
+        for i, suggestion in enumerate(cleaned_suggestions):
+            message += getEmojiNumber(i+1, True) + '  *' + suggestion + '*\n'
+        message += '\nReact to this message with a ✅ to add it or an ❌ to reject it'
+        return message
+
+    def add_phrase(self, phrase):
+        """
+        Adds the given phrase to the searchphrases collection
+        """
+        if not self.gfeuddb.checkIfSearchPhraseExists(phrase):
+            self.gfeuddb.addGoogleSearchPhrase(phrase)
 
 def getEmojiScore(score):
     """

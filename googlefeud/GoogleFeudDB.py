@@ -160,3 +160,32 @@ class GoogleFeudDB:
 
         except Exception as error:
             print('Failed to fetch search phrase: ', error)
+
+    def checkIfUserIsAdmin(self, discord_author):
+        """
+        Returns user contained as a Python dict using Discord author's id. If it doesn't exist, return None
+        """
+        try:
+            return self.db.roles.find_one({ "user_id" : discord_author.id })
+        except Exception as error:
+            print('Failed to retrieve admin user: ', error)
+
+    def addGoogleSearchPhrase(self, phrase):
+        """
+        ADMIN: Adds a Google search phrase.
+        """
+        try:
+            trimmed_phrase = phrase.strip()
+            self.db.searchphrases.insert({'phrase': phrase})
+        except Exception as error:
+            print('Failed to add a search phrase: ', error)
+
+    def checkIfSearchPhraseExists(self, phrase):
+        """
+        ADMIN: Checks if the given phrase already exists
+        """
+        try:
+            trimmed_phrase = phrase.strip()
+            return self.db.searchphrases.find_one({'phrase': phrase})
+        except Exception as error:
+            print('Failed to look for the given phrase: ', error)

@@ -1,6 +1,7 @@
 import os
 import time
 import discord
+import asyncio
 
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound, MissingRequiredArgument
@@ -84,6 +85,36 @@ async def scoreboard(ctx):
         await ctx.send(response)
     else:
         await ctx.send(gfeud.getScoreboard())
+
+@bot.command(name='add', hidden=True)
+async def add_phrase(ctx, *, phrase: str):
+    check_mark = '✅'
+    x_mark = '❌'
+    def check(reaction, user):
+        return user == ctx.author and (reaction.emoji == check_mark or reaction.emoji == x_mark)
+
+    gfeud = GoogleFeud(ctx)
+    if gfeud.isUserAnAdmin():
+        response = gfeud.showSuggestionsOfCandidatePhrase(phrase)
+        if not response:
+            await ctx.send('> This phrase already exists  :confused:')
+            return
+        msg = await ctx.send(response)
+        await msg.add_reaction(check_mark)
+        await msg.add_reaction(x_mark)
+
+        try:
+            reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
+            if reaction.emoji == check_mark:
+                await ctx.send(f"> Added the phrase **{phrase}** to the collection! :grin:")
+                gfeud.add_phrase(phrase)
+            elif reaction.emoji == x_mark:
+                await ctx.send("> Ok I won't add **" + phrase + '**  :woozy_face:')
+
+        except asyncio.TimeoutError:
+            await ctx.send(f'> The phrase **{phrase}** was not added because you took too long  :rage:')
+    else:
+        raise CommandNotFound(ctx.author + ' is not authorized to use this command')
 
 @bot.event
 async def on_command_error(ctx, error):

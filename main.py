@@ -114,7 +114,7 @@ async def add_phrase(ctx, *, phrase: str):
         except asyncio.TimeoutError:
             await ctx.send(f'> The phrase **{phrase}** was not added because you took too long  :rage:')
     else:
-        raise CommandNotFound(ctx.author + ' is not authorized to use this command')
+        raise CommandNotFound(str(ctx.author) + ' is not authorized to use this command')
 
 @bot.event
 async def on_command_error(ctx, error):

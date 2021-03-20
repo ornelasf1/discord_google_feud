@@ -135,11 +135,5 @@ async def on_command_error(ctx, error):
 
     raise error
 
-@bot.event
-async def on_message(message):
-    sectioned_msgs = message.content.split(' ')
-    if not sectioned_msgs[0] == None and (sectioned_msgs[0].lower() == 'gf' or sectioned_msgs[0].lower() == 'gfeud'):
-        print(message, message.content)
-
 if __name__ == "__main__":
     bot.run(TOKEN)

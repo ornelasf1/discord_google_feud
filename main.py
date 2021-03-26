@@ -73,7 +73,8 @@ async def guess_phrase(ctx, phrase: str):
                 await ctx.send(gfeud.getWinnerResponse())
             else:
                 await ctx.send(gfeud.getGFeudBoard())
-    except:
+    except Exception as error:
+        print('ERROR: Game failed, shutting down game. ', error)
         gfeud.endGame()
         await ctx.send('>>> Our bad, something might\'ve broken  :confounded:')
 

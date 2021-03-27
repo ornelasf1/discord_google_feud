@@ -45,7 +45,15 @@ class TestGoogleFeud(unittest.TestCase):
         self.sut.phrase = 'why is my cat'
         self.sut.fetchSuggestions()
 
-        expected_suggestions = {'sneezing': {'solved': False, 'score': 1000, 'solvedBy': ''}, 'throwing up': {'solved': False, 'score': 900, 'solvedBy': ''}, 'meowing so much': {'solved': False, 'score': 800, 'solvedBy': ''}, 'drooling': {'solved': False, 'score': 700, 'solvedBy': ''}, 'peeing everywhere': {'solved': False, 'score': 600, 'solvedBy': ''}, 'coughing': {'solved': False, 'score': 500, 'solvedBy': ''}, 'yowling': {'solved': False, 'score': 400, 'solvedBy': ''}, 'so clingy': {'solved': False, 'score': 300, 'solvedBy': ''}, 'licking me': {'solved': False, 'score': 200, 'solvedBy': ''}}
+        expected_suggestions = {
+            'sneezing': {'solved': False, 'score': 1000, 'solvedBy': ''}, 
+            'throwing up': {'solved': False, 'score': 900, 'solvedBy': ''}, 
+            'meowing so much': {'solved': False, 'score': 800, 'solvedBy': ''}, 
+            'drooling': {'solved': False, 'score': 700, 'solvedBy': ''}, 
+            'peeing everywhere': {'solved': False, 'score': 600, 'solvedBy': ''}, 
+            'coughing': {'solved': False, 'score': 500, 'solvedBy': ''}, 
+            'yowling': {'solved': False, 'score': 400, 'solvedBy': ''}, 
+            'so clingy': {'solved': False, 'score': 300, 'solvedBy': ''}}
 
         self.assertEqual(self.sut.suggestions, expected_suggestions)
 

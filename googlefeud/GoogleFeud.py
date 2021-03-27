@@ -128,13 +128,13 @@ class GoogleFeud:
         # Initializes game data and inserts into database
         self.suggestions = dict()
         for i, suggestion in enumerate(cleaned_suggestions):
-            suggestion_info = {
-                'solved' : False,
-                'score' : 1000 - (i * 100),
-                'solvedBy' : ""
-            }
-            self.suggestions[suggestion] = suggestion_info
-            
+            if i < 8:
+                suggestion_info = {
+                    'solved' : False,
+                    'score' : 1000 - (i * 100),
+                    'solvedBy' : ""
+                }
+                self.suggestions[suggestion] = suggestion_info
         self.gfeuddb.insertSuggestions(self.suggestions)
 
     def loadSession(self):
@@ -159,7 +159,7 @@ class GoogleFeud:
         """
         rank = 1
         for key in self.suggestions:
-            if rank > 10:
+            if rank > 8:
                 break
             if not self.suggestions[key]['solved'] and not self.game_ended:
                 board += '\n' + getEmojiNumber(rank, True) + '  ' + (':small_orange_diamond::small_blue_diamond:' * 4)

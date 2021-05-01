@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from datetime import datetime
 import os
 
 load_dotenv()
@@ -11,6 +12,7 @@ class GoogleFeudDB:
         self.db = client.gfeuddb
         self.guild = guild
         self.channel = channel
+        self.updateLastModifiedTime()
 
     def createSession(self):
         """
@@ -23,7 +25,8 @@ class GoogleFeudDB:
                 'phrase' : str(),
                 'scores' : dict(),
                 'suggestions' : dict(),
-                'turns' : 5
+                'turns' : 5,
+                'last_modified' : datetime.utcnow()
             }
             # suggestions contains objects with the following shape
             # <suggestion_phrase>: Object
@@ -48,6 +51,19 @@ class GoogleFeudDB:
                 })
         except Exception as error:
             print('Failed terminate game session: ', error)
+
+    def updateLastModifiedTime(self):
+        """
+        Adds and updates the last_modified time field for a session. 
+        Used to expire a game session after the expiration time has passed
+        """
+        try:
+            return self.db.sessions.update_one(
+                { "guild" : self.guild, "channel" : self.channel },
+                { "$set" : { 'last_modified' : datetime.utcnow() } }
+            )
+        except Exception as error:
+            print('Failed to update last modified time: ', error)
 
     def getSession(self):
         """

@@ -2,3 +2,4 @@ discord.py == 1.5.1
 python-dotenv == 0.15.0
 fake-useragent == 0.1.11
 pymongo == 3.11.1
+requests == 2.22.0

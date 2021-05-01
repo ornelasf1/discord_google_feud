@@ -68,9 +68,9 @@ async def guess_phrase(ctx, phrase: str):
 
             if gfeud.isGameOver():
                 print(ctx, f'Game over')
-                gfeud.endGame()
                 await ctx.send(gfeud.getGFeudBoard())
                 await ctx.send(gfeud.getWinnerResponse())
+                gfeud.endGame()
             else:
                 await ctx.send(gfeud.getGFeudBoard())
     except Exception as error:

@@ -166,7 +166,8 @@ class GoogleFeud:
             elif not self.suggestions[key]['solved'] and self.game_ended:
                 board += f'\n{getEmojiNumber(rank, True)}  {self.phrase} {key}'
             else:
-                board += f'\n{getEmojiNumber(rank, True)}  **{self.phrase} {key}** | Solved By: *{self.suggestions[key]["solvedBy"]}* {getEmojiScore(self.suggestions[key]["score"])}'
+                solved_by_username = self.gfeuddb.getDisplayNameForUser(self.suggestions[key]["solvedBy"])
+                board += f'\n{getEmojiNumber(rank, True)}  **{self.phrase} {key}** | Solved By: *{solved_by_username}* {getEmojiScore(self.suggestions[key]["score"])}'
             rank += 1
         if not self.turns == 5:
             board += '\n\n' + getTurnText(self.turns)
@@ -178,19 +179,23 @@ class GoogleFeud:
         member is a Discord object Member that contains username - https://discordpy.readthedocs.io/en/latest/api.html#member
         """
         guesser = str(member.display_name)
+        guesser_id = str(member.id)
         for i, suggestion in enumerate(self.suggestions):
             foundMatch = self.isGuessInPhrase(guess, suggestion)
             if foundMatch and not self.suggestions[suggestion]['solved']:
                 print(self.ctx, f"'{guess}' was correct, it matched '{suggestion}'")
                 self.suggestions[suggestion]['solved'] = True
-                self.suggestions[suggestion]['solvedBy'] = guesser
-                if not guesser in self.scores:
-                    self.scores[guesser] = int(self.suggestions[suggestion]['score'])
+                self.suggestions[suggestion]['solvedBy'] = guesser_id
+                if not guesser_id in self.scores:
+                    self.scores[guesser_id] = { 
+                        'score' : int(self.suggestions[suggestion]['score']),
+                        'display_name' : guesser
+                    }
                 else:
-                    self.scores[guesser] += int(self.suggestions[suggestion]['score'])
+                    self.scores[guesser_id]['score'] += int(self.suggestions[suggestion]['score'])
 
-                self.gfeuddb.updateScoreForUser(guesser, int(self.suggestions[suggestion]['score']))
-                self.gfeuddb.updateSuggestionSolved(suggestion, guesser)
+                self.gfeuddb.updateScoreForUser(member, int(self.suggestions[suggestion]['score']))
+                self.gfeuddb.updateSuggestionSolved(suggestion, guesser_id)
                 self.statusMessage = f":clap:  Great answer, {guesser}! {self.suggestions[suggestion]['score']} points for you  :partying_face:"
                 return True
             elif foundMatch and self.suggestions[suggestion]['solved']:
@@ -223,15 +228,16 @@ class GoogleFeud:
         return True
 
     def getWinnerResponse(self):
-        ordered_scores = dict(sorted(self.scores.items(), key=lambda score: score[1], reverse=True))
+        ordered_scores = dict(sorted(self.scores.items(), key=lambda score_dict: score_dict[1]['score'], reverse=True))
         winners = {}
-        for winner in ordered_scores:
+        for winner_id in ordered_scores:
+            winner_name = ordered_scores[winner_id]['display_name']
             if len(winners) == 0:
-                winners[winner] = ordered_scores[winner]
+                winners[winner_name] = ordered_scores[winner_id]['score']
             else:
                 first_winner = list(winners.keys())[0]
-                if ordered_scores[winner] == winners[first_winner]:
-                    winners[winner] = ordered_scores[winner]
+                if ordered_scores[winner_id]['score'] == winners[first_winner]:
+                    winners[winner_name] = ordered_scores[winner_id]['score']
                 else:
                     break
         plurar_winner_label = "Winners" if len(winners) > 1 else "Winner"
@@ -245,10 +251,10 @@ class GoogleFeud:
     def getScoreboard(self):
         scoreboard = ">>> ***Scoreboard***\n"
 
-        ordered_scores = dict(sorted(self.scores.items(), key=lambda score: score[1], reverse=True))
+        ordered_scores = dict(sorted(self.scores.items(), key=lambda score_dict: score_dict[1]['score'], reverse=True))
 
         if len(ordered_scores) > 0:
-            scoreboard += ("\n".join([f"{getEmojiNumber(i + 1)}  **{username}**  {getEmojiScore(ordered_scores[username])}" for i, username in enumerate(ordered_scores)]))
+            scoreboard += ("\n".join([f"{getEmojiNumber(i + 1)}  **{ordered_scores[user_id]['display_name']}**  {getEmojiScore(ordered_scores[user_id]['score'])}" for i, user_id in enumerate(ordered_scores)]))
         else:
             scoreboard += "No one has guessed right :rofl:"
 

@@ -34,8 +34,10 @@ class GoogleFeudDB:
             #   score: int
             #   solvedBy: string
             #
-            # scores contains K,V entries with the following shape
-            # <username>: <score>
+            # scores has the following shape
+            #   scores: object {
+            #       id: object { score: int, display_name: string } 
+            #   }
             self.db.sessions.insert(session)
         except Exception as error:
             print('Failed to create a session: ', error)
@@ -77,6 +79,19 @@ class GoogleFeudDB:
         except Exception as error:
             print('Failed to retrieve a game session: ', error)
 
+    def getDisplayNameForUser(self, user_id):
+        """
+        Returns the display_name for a user with the given user_id from scores.
+        """
+        try:
+            session = self.db.sessions.find_one({ 
+                "guild" : self.guild,
+                "channel" : self.channel
+                })
+            return session['scores'][user_id]['display_name']
+        except Exception as error:
+            print('Failed to retrieve the display name: ', error)
+
 
     def updatePhrase(self, phrase):
         """
@@ -93,18 +108,30 @@ class GoogleFeudDB:
         except Exception as error:
             print('Failed to update phrase: ', error)
 
-    def updateScoreForUser(self, username, score):
+    def updateScoreForUser(self, user, score):
         """
         Increase the score for a user. Creates and sets score for user if it doesnt exist
         """
+        user_id = str(user.id)
+        display_name = str(user.display_name)
         try:
-            new_score = {
-                f"scores.{username}" : score
-            }
+            if self.db.sessions.find_one({ f"scores.{user_id}" : { '$exists' : True } }):
+                new_score = {
+                    f"scores.{user_id}.score" : score
+                }
+                operation = { '$inc' : new_score }
+            else:
+                new_entry = {
+                    f"scores.{user_id}" : {
+                        'score' : score,
+                        'display_name' : display_name
+                    }
+                }
+                operation = { '$set' : new_entry }
 
             result = self.db.sessions.update_one(
-                { "guild" : self.guild, "channel" : self.channel }, 
-                { "$inc" : new_score })
+                    { "guild" : self.guild, "channel" : self.channel }, 
+                    operation)
         except Exception as error:
             print('Failed to update score for user: ', error)
 
@@ -123,7 +150,7 @@ class GoogleFeudDB:
         except Exception as error:
             print('Failed to insert suggestions: ', error)
 
-    def updateSuggestionSolved(self, suggestion, username):
+    def updateSuggestionSolved(self, suggestion, user_id):
         """
         Finds and updates suggestion for user in a session using the given guild and channel values.
         https://stackoverflow.com/questions/28828825/updating-an-object-inside-an-array-with-pymongo
@@ -139,7 +166,7 @@ class GoogleFeudDB:
                 solved_suggestion)
 
             solvedBy_suggestion = {
-                "$set": { f"suggestions.{suggestion}.solvedBy" : username }
+                "$set": { f"suggestions.{suggestion}.solvedBy" : user_id }
             }
 
             result = self.db.sessions.update_one(

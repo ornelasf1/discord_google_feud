@@ -76,7 +76,7 @@ async def guess_phrase(ctx, phrase: str):
     except Exception as error:
         print(ctx, 'ERROR: Game failed, shutting down game. ', error)
         gfeud.endGame()
-        await ctx.send('>>> Our bad, something might\'ve broken  :confounded:')
+        await ctx.send('>>> Our bad, something might\'ve broken  :confounded:\nFeel free to report this to the support server: https://discord.com/invite/xX5mk8Esg3')
 
 @bot.command(name='scoreboard', help='Display scores for all players in this game session', no_category='Google Feud')
 async def scoreboard(ctx):

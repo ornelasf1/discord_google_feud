@@ -25,7 +25,7 @@ print = logger(print)
 @bot.event
 async def on_ready():
     await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="gf help"))
-    print('Beep Boop I am ready to serve the humans.')
+    print(f"Beep Boop I am ready to serve the humans. Currently serving {len(bot.guilds)} human gatherings")
 
 @bot.command(name='start', help='Starts a game of Google Feud')
 async def start_game(ctx):

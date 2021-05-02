@@ -166,7 +166,7 @@ class GoogleFeud:
             elif not self.suggestions[key]['solved'] and self.game_ended:
                 board += f'\n{getEmojiNumber(rank, True)}  {self.phrase} {key}'
             else:
-                solved_by_username = self.gfeuddb.getDisplayNameForUser(self.suggestions[key]["solvedBy"])
+                solved_by_username = self.scores[self.suggestions[key]["solvedBy"]]['display_name']
                 board += f'\n{getEmojiNumber(rank, True)}  **{self.phrase} {key}** | Solved By: *{solved_by_username}* {getEmojiScore(self.suggestions[key]["score"])}'
             rank += 1
         if not self.turns == 5:

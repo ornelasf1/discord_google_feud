@@ -266,25 +266,51 @@ class GoogleFeud:
         """
         return self.gfeuddb.checkIfUserIsAdmin(self.ctx.author)
 
-    def showSuggestionsOfCandidatePhrase(self, phrase):
+    def showSuggestionsOfCandidatePhrase(self, phrase, isAdmin):
         """
-        Returns a list of suggestions for the given phrase.
+        Checks if the given phrase is in the collection of phrases, if so return early. 
+        Otherwise check if user is an admin, if so return admin message and suggestions, 
+        otherwise check if phrase is in the collection of contributions.
+        Returns a message of the list of suggestions for the given phrase and the suggestions.
         The suggestions are curated by trimming down suggestions and removing duplicates
         """
         if self.gfeuddb.checkIfSearchPhraseExists(phrase):
-            return None
+            return None, None
 
         lower_phrase, suggestions = self._get_suggestions_response(phrase)
         
         cleaned_suggestions = self._trim_suggestions(lower_phrase, suggestions)
 
         cleaned_suggestions, reversed_suggestions = self._remove_duplicates_from_suggestions(cleaned_suggestions)
+        if isAdmin:
+            message = f'>>> The phrase **{phrase}** will display the following suggestions\n'
+            for i, suggestion in enumerate(cleaned_suggestions):
+                message += getEmojiNumber(i+1, True) + '  *' + suggestion + '*\n'
+            message += '\nReact to this message with a ✅ to add it or an ❌ to reject it'
+        else:
+            if self.gfeuddb.check_if_phrase_is_in_contributions(phrase):
+                return None, None
 
-        message = f'>>> The phrase **{phrase}** will display the following suggestions\n'
-        for i, suggestion in enumerate(cleaned_suggestions):
-            message += getEmojiNumber(i+1, True) + '  *' + suggestion + '*\n'
-        message += '\nReact to this message with a ✅ to add it or an ❌ to reject it'
-        return message
+            message = f'>>> The phrase **{phrase}** will display the following suggestions\n'
+            for i, suggestion in enumerate(cleaned_suggestions):
+                message += getEmojiNumber(i+1, True) + '  *' + suggestion + '*\n'
+            message += '\nReact to this message with a ✅ to submit for approval or an ❌ to reject it'
+
+        return message, cleaned_suggestions
+    
+    def add_contribution(self, phrase, suggestions):
+        self.gfeuddb.add_contribution(phrase, suggestions, self.ctx.author)
+
+    def get_num_of_contributions_left(self):
+        """
+        Returns number of times the user is able to contribute. If the contributor is not registered, simply return 1 as the number of times left.
+        If they are registered, return the number of times left based on the daily limit.
+        """
+        contributor = self.gfeuddb.get_contributor(self.ctx.author)
+        if not contributor:
+            return 1
+        return contributor['daily_limit'] - contributor['num_of_contributions_today']
+
 
     def add_phrase(self, phrase):
         """

@@ -88,7 +88,7 @@ async def scoreboard(ctx):
     else:
         await ctx.send(gfeud.getScoreboard())
 
-@bot.command(name='add', hidden=True)
+@bot.command(name='add', help='Help us out by contributing your own Google phrase')
 async def add_phrase(ctx, *, phrase: str):
     check_mark = '✅'
     x_mark = '❌'
@@ -97,7 +97,7 @@ async def add_phrase(ctx, *, phrase: str):
 
     gfeud = GoogleFeud(ctx)
     if gfeud.isUserAnAdmin():
-        response = gfeud.showSuggestionsOfCandidatePhrase(phrase)
+        response, _ = gfeud.showSuggestionsOfCandidatePhrase(phrase, True)
         if not response:
             await ctx.send('> This phrase already exists  :confused:')
             return
@@ -116,7 +116,32 @@ async def add_phrase(ctx, *, phrase: str):
         except asyncio.TimeoutError:
             await ctx.send(f'> The phrase **{phrase}** was not added because you took too long  :rage:')
     else:
-        raise CommandNotFound(str(ctx.author) + ' is not authorized to use this command')
+        num_of_contributions = gfeud.get_num_of_contributions_left()
+
+        if num_of_contributions <= 0:
+            await ctx.send("> You've reached your daily limit of contributions. Thank you for your help!  :relaxed:")
+            return
+
+        response, suggestions = gfeud.showSuggestionsOfCandidatePhrase(phrase, False)
+        if not response:
+            await ctx.send('> This phrase already exists  :confused:')
+            return
+        msg = await ctx.send(response)
+        await msg.add_reaction(check_mark)
+        await msg.add_reaction(x_mark)
+
+        try:
+            reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
+            if reaction.emoji == check_mark:
+                await ctx.send(f"> Submitted the phrase **{phrase}**! We'll review it soon. Thanks for the contribution! :grin:")
+                gfeud.add_contribution(phrase, suggestions)
+                new_num_of_contributions = gfeud.get_num_of_contributions_left()
+                await ctx.send(f"> You can contribute **{new_num_of_contributions}** more time(s)")
+            elif reaction.emoji == x_mark:
+                await ctx.send("> Ok I won't submit **" + phrase + '**  :woozy_face:')
+
+        except asyncio.TimeoutError:
+            await ctx.send(f'> The phrase **{phrase}** was not submitted because you took too long  :rage:')
 
 @bot.event
 async def on_command_error(ctx, error):

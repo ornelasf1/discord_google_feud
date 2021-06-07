@@ -223,6 +223,45 @@ class GoogleFeudDB:
         except Exception as error:
             print('Failed to add a search phrase: ', error)
 
+    def add_contribution(self, phrase, suggestions, discord_author):
+        try:
+            trimmed_phrase = phrase.strip()
+            # Shape of a contribution document
+            self.db.contributions.insert({
+                'user_id': str(discord_author.id),
+                'phrase': phrase,
+                'suggestions': suggestions,
+                'submitted_on' : datetime.utcnow()
+                })
+            if self.db.contributors.find_one({ "user_id" : str(discord_author.id) }):
+                result = self.db.contributors.update_one(
+                { "user_id" : str(discord_author.id) },
+                { "$inc" : { 'num_of_contributions_today' : 1, 'num_of_contributions' : 1 } })
+            else:
+                # Shape of a contributor document
+                self.db.contributors.insert({
+                    'user_id': str(discord_author.id),
+                    'num_of_contributions': 1,
+                    'num_of_approved_contributions': 0,
+                    'num_of_contributions_today': 1,
+                    'daily_limit': 10
+                    })
+        except Exception as error:
+            print('Failed to add a contribution: ', error)
+
+    def get_contributor(self, discord_author):
+        try:
+            return self.db.contributors.find_one({ "user_id" : str(discord_author.id) })
+        except Exception as error:
+            print('Failed to get contributor: ', error)
+
+    def check_if_phrase_is_in_contributions(self, phrase):
+        try:
+            trimmed_phrase = phrase.strip()
+            return self.db.contributions.find_one({'phrase': phrase})
+        except Exception as error:
+            print('Failed to look for the phrase in contributions: ', error)
+
     def checkIfSearchPhraseExists(self, phrase):
         """
         ADMIN: Checks if the given phrase already exists

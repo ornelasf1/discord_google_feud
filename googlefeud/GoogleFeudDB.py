@@ -248,6 +248,35 @@ class GoogleFeudDB:
                     })
         except Exception as error:
             print('Failed to add a contribution: ', error)
+    
+    def get_oldest_contribution(self):
+        """
+        Returns the oldest submitted contribution from our collection. Returns None if the collection is empty
+        """
+        try:
+            return self.db.contributions.find().sort("submitted_on",1).limit(1)[0]
+        except Exception as error:
+            print('Failed to get oldest contribution: ', error)
+
+    def delete_contribution(self, phrase):
+        """
+        Deletes a contribution based on its phrase
+        """
+        try:
+            return self.db.contributions.delete_one({ 'phrase' : phrase })
+        except Exception as error:
+            print('Failed to delete contribution: ', error)
+
+    def increment_approved_contribution(self, user_id):
+        """
+        Credit a user for their contribution and increase their contributions approved tally
+        """
+        try:
+            return self.db.contributors.update_one(
+                { "user_id" : str(user_id) },
+                { "$inc" : { 'num_of_approved_contributions' : 1 } })
+        except Exception as error:
+            print('Failed to increased number of approved contributions: ', error)
 
     def get_contributor(self, discord_author):
         try:

@@ -266,6 +266,25 @@ class GoogleFeud:
         """
         return self.gfeuddb.checkIfUserIsAdmin(self.ctx.author)
 
+    def getSuggestionsFromContribution(self):
+        contribution = self.gfeuddb.get_oldest_contribution()
+        if not contribution:
+            return None, None
+        lower_phrase, suggestions = self._get_suggestions_response(contribution["phrase"])
+        
+        cleaned_suggestions = self._trim_suggestions(lower_phrase, suggestions)
+
+        cleaned_suggestions, reversed_suggestions = self._remove_duplicates_from_suggestions(cleaned_suggestions)
+
+        contributer = contribution['user_id']
+
+        message = f'>>> The phrase **{lower_phrase}** by **{contributer}** will display the following suggestions\n'
+        for i, suggestion in enumerate(cleaned_suggestions):
+            message += getEmojiNumber(i+1, True) + '  *' + suggestion + '*\n'
+        message += '\nReact to this message with a ✅ to add it or an ❌ to reject it'
+
+        return message, contribution
+
     def showSuggestionsOfCandidatePhrase(self, phrase, isAdmin):
         """
         Checks if the given phrase is in the collection of phrases, if so return early. 
@@ -304,6 +323,9 @@ class GoogleFeud:
     def add_contribution(self, phrase, suggestions):
         self.gfeuddb.add_contribution(phrase, suggestions, self.ctx.author)
 
+    def delete_contribution(self, phrase):
+        self.gfeuddb.delete_contribution(phrase)
+
     def get_num_of_contributions_left(self):
         """
         Returns number of times the user is able to contribute. If the contributor is not registered, simply return 1 as the number of times left.
@@ -315,12 +337,16 @@ class GoogleFeud:
         return contributor['daily_limit'] - contributor['num_of_contributions_today']
 
 
-    def add_phrase(self, phrase):
+    def add_phrase(self, phrase, user_id):
         """
-        Adds the given phrase to the searchphrases collection
+        Adds the given phrase to the searchphrases collection.
+        If a user_id is provided, then we're adding a phrase from the contributions collection and
+        we should credit the user that contributed it.
         """
         if not self.gfeuddb.checkIfSearchPhraseExists(phrase):
             self.gfeuddb.addGoogleSearchPhrase(phrase)
+            if not user_id == None:
+                self.gfeuddb.increment_approved_contribution(user_id)
 
 def getEmojiScore(score):
     """

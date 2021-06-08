@@ -2,6 +2,7 @@ import os
 import time
 import discord
 import asyncio
+import re
 
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound, MissingRequiredArgument
@@ -88,6 +89,40 @@ async def scoreboard(ctx):
     else:
         await ctx.send(gfeud.getScoreboard())
 
+@bot.command(name='review', hidden=True)
+async def review_phrase(ctx):
+    check_mark = '✅'
+    x_mark = '❌'
+    def check(reaction, user):
+        return user == ctx.author and (reaction.emoji == check_mark or reaction.emoji == x_mark)
+
+    gfeud = GoogleFeud(ctx)
+    if gfeud.isUserAnAdmin():
+        response, contribution = gfeud.getSuggestionsFromContribution()
+        if response == None:
+            await ctx.send('> No contributions to review  :sunglasses:')
+            return
+
+        phrase = contribution['phrase']
+        user_id = contribution['user_id']
+
+        msg = await ctx.send(response)
+        await msg.add_reaction(check_mark)
+        await msg.add_reaction(x_mark)
+
+        try:
+            reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
+            if reaction.emoji == check_mark:
+                await ctx.send(f"> Added the phrase **{phrase}** to the collection! :grin:")
+                gfeud.add_phrase(phrase, user_id)
+            elif reaction.emoji == x_mark:
+                await ctx.send("> Ok I won't add **" + phrase + '**  :woozy_face:  Rejecting the contribution')
+            gfeud.delete_contribution(phrase)
+        except asyncio.TimeoutError:
+            await ctx.send(f'> The phrase **{phrase}** was not added because you took too long  :rage:')
+    else:
+        raise CommandNotFound(str(ctx.author) + ' is not authorized to use this command')
+
 @bot.command(name='add', help='Help us out by contributing your own Google phrase')
 async def add_phrase(ctx, *, phrase: str):
     check_mark = '✅'
@@ -109,13 +144,21 @@ async def add_phrase(ctx, *, phrase: str):
             reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
             if reaction.emoji == check_mark:
                 await ctx.send(f"> Added the phrase **{phrase}** to the collection! :grin:")
-                gfeud.add_phrase(phrase)
+                gfeud.add_phrase(phrase, None)
             elif reaction.emoji == x_mark:
                 await ctx.send("> Ok I won't add **" + phrase + '**  :woozy_face:')
 
         except asyncio.TimeoutError:
             await ctx.send(f'> The phrase **{phrase}** was not added because you took too long  :rage:')
     else:
+        if not bool(re.match(r'^[A-z0-9 ]+$', phrase)):
+            await ctx.send("> Your phrase can only contain alphanumeric characters  :anguished:")
+            return
+
+        if len(phrase) > 60:
+            await ctx.send("> Your phrase is too long  :mask:")
+            return
+
         num_of_contributions = gfeud.get_num_of_contributions_left()
 
         if num_of_contributions <= 0:
@@ -135,7 +178,7 @@ async def add_phrase(ctx, *, phrase: str):
         await msg.add_reaction(x_mark)
 
         try:
-            reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
+            reaction, user = await bot.wait_for('reaction_add', timeout=30.0, check=check)
             if reaction.emoji == check_mark:
                 await ctx.send(f"> Submitted the phrase **{phrase}**! We'll review it soon. Thanks for the contribution! :grin:")
                 gfeud.add_contribution(phrase, suggestions)

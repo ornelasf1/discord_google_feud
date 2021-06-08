@@ -294,7 +294,10 @@ class GoogleFeud:
             message = f'>>> The phrase **{phrase}** will display the following suggestions\n'
             for i, suggestion in enumerate(cleaned_suggestions):
                 message += getEmojiNumber(i+1, True) + '  *' + suggestion + '*\n'
-            message += '\nReact to this message with a ✅ to submit for approval or an ❌ to reject it'
+            if len(cleaned_suggestions) < 3:
+                message += '\nThere isn\'t enough auto-complete suggestions for this phrase  :pensive:'
+            else:
+                message += '\nReact to this message with a ✅ to submit for approval or an ❌ to reject it'
 
         return message, cleaned_suggestions
     

@@ -127,6 +127,10 @@ async def add_phrase(ctx, *, phrase: str):
             await ctx.send('> This phrase already exists  :confused:')
             return
         msg = await ctx.send(response)
+
+        if len(suggestions) < 3:
+            return
+
         await msg.add_reaction(check_mark)
         await msg.add_reaction(x_mark)
 

@@ -132,10 +132,11 @@ async def add_phrase(ctx, *, phrase: str):
 
     gfeud = GoogleFeud(ctx)
 
-    lower_phrase = phrase.lower()
+    clean_phrase = phrase.lower()
+    clean_phrase = ' '.join(clean_phrase.split())
 
     if gfeud.isUserAnAdmin():
-        response, _ = gfeud.showSuggestionsOfCandidatePhrase(lower_phrase, True)
+        response, _ = gfeud.showSuggestionsOfCandidatePhrase(clean_phrase, True)
         if not response:
             await ctx.send('> This phrase already exists  :confused:')
             return
@@ -146,19 +147,19 @@ async def add_phrase(ctx, *, phrase: str):
         try:
             reaction, user = await bot.wait_for('reaction_add', timeout=60.0, check=check)
             if reaction.emoji == check_mark:
-                await ctx.send(f"> Added the phrase **{lower_phrase}** to the collection! :grin:")
-                gfeud.add_phrase(lower_phrase, None)
+                await ctx.send(f"> Added the phrase **{clean_phrase}** to the collection! :grin:")
+                gfeud.add_phrase(clean_phrase, None)
             elif reaction.emoji == x_mark:
-                await ctx.send("> Ok I won't add **" + lower_phrase + '**  :woozy_face:')
+                await ctx.send("> Ok I won't add **" + clean_phrase + '**  :woozy_face:')
 
         except asyncio.TimeoutError:
-            await ctx.send(f'> The phrase **{lower_phrase}** was not added because you took too long  :rage:')
+            await ctx.send(f'> The phrase **{clean_phrase}** was not added because you took too long  :rage:')
     else:
-        if not bool(re.match(r'^[A-z0-9 ]+$', lower_phrase)):
+        if not bool(re.match(r'^[A-z0-9 ]+$', clean_phrase)):
             await ctx.send("> Your phrase can only contain alphanumeric characters  :anguished:")
             return
 
-        if len(lower_phrase) > 60:
+        if len(clean_phrase) > 60:
             await ctx.send("> Your phrase is too long  :mask:")
             return
 
@@ -168,7 +169,7 @@ async def add_phrase(ctx, *, phrase: str):
             await ctx.send("> You've reached your daily limit of contributions. Thank you for your help!  :relaxed:")
             return
 
-        response, suggestions = gfeud.showSuggestionsOfCandidatePhrase(lower_phrase, False)
+        response, suggestions = gfeud.showSuggestionsOfCandidatePhrase(clean_phrase, False)
         if not response:
             await ctx.send('> This phrase already exists  :confused:')
             return
@@ -183,15 +184,15 @@ async def add_phrase(ctx, *, phrase: str):
         try:
             reaction, user = await bot.wait_for('reaction_add', timeout=30.0, check=check)
             if reaction.emoji == check_mark:
-                await ctx.send(f"> Submitted the phrase **{lower_phrase}**! We'll review it soon. Thanks for the contribution! :grin:")
-                gfeud.add_contribution(lower_phrase, suggestions)
+                await ctx.send(f"> Submitted the phrase **{clean_phrase}**! We'll review it soon. Thanks for the contribution! :grin:")
+                gfeud.add_contribution(clean_phrase, suggestions)
                 new_num_of_contributions = gfeud.get_num_of_contributions_left()
                 await ctx.send(f"> You can contribute **{new_num_of_contributions}** more time(s)")
             elif reaction.emoji == x_mark:
-                await ctx.send("> Ok I won't submit **" + lower_phrase + '**  :woozy_face:')
+                await ctx.send("> Ok I won't submit **" + clean_phrase + '**  :woozy_face:')
 
         except asyncio.TimeoutError:
-            await ctx.send(f'> The phrase **{lower_phrase}** was not submitted because you took too long  :rage:')
+            await ctx.send(f'> The phrase **{clean_phrase}** was not submitted because you took too long  :rage:')
 
 @bot.event
 async def on_command_error(ctx, error):

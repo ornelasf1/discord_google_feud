@@ -13,6 +13,8 @@ from googlefeud.LoggerPrint import logger
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
+SUPPORT_SERVER_URL = 'https://discord.com/invite/xX5mk8Esg3'
+
 help_command = commands.DefaultHelpCommand(
     no_category = 'Google Feud'
 )
@@ -55,7 +57,7 @@ async def end_game(ctx):
 
     await ctx.send(response)
 
-@bot.command(name='a', help='Provide your auto-complete guess')
+@bot.command(name='a', help='Provide your auto-complete guess\n\nFor example,\ngf a super neat answer')
 async def guess_phrase(ctx, phrase: str):
     try:
         gfeud = GoogleFeud(ctx)
@@ -78,7 +80,7 @@ async def guess_phrase(ctx, phrase: str):
     except Exception as error:
         print(ctx, 'ERROR: Game failed, shutting down game. ', error)
         gfeud.endGame()
-        await ctx.send('>>> Our bad, something might\'ve broken  :confounded:\nFeel free to report this to the support server: https://discord.com/invite/xX5mk8Esg3')
+        await ctx.send('>>> Our bad, something might\'ve broken  :confounded:\nFeel free to report this to the support server: ' + SUPPORT_SERVER_URL)
 
 @bot.command(name='scoreboard', help='Display scores for all players in this game session', no_category='Google Feud')
 async def scoreboard(ctx):
@@ -123,7 +125,7 @@ async def review_phrase(ctx):
     else:
         raise CommandNotFound(str(ctx.author) + ' is not authorized to use this command')
 
-@bot.command(name='add', help='Help us out by contributing your own Google phrase')
+@bot.command(name='contribute', help='Help us out by contributing your own Google phrase\n\nFor example,\ngf contribute why do cats')
 async def add_phrase(ctx, *, phrase: str):
     check_mark = '✅'
     x_mark = '❌'
@@ -205,7 +207,7 @@ async def on_command_error(ctx, error):
     if isinstance(error, MissingRequiredArgument):
         print(ctx, error)
         if "phrase" == error.param.name:
-            response = ">>> Provide a phrase with that command  :wink:\n.e.g `gf a <phrase>`"
+            response = ">>> Provide a phrase with that command  :wink:\n.e.g `gf a this is my answer`"
         else:
             response = f">>> Unknown command {error.param.name}. Run `gf help` for valid commands"
         await ctx.send(response)

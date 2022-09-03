@@ -7,6 +7,7 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "c7:83:15:5e:8d:f3:72:0f:86:5d:6d:dd:3e:73:5b:b3"
+            - "24:f8:42:35:c9:a6:2a:96:38:c0:29:f6:1e:22:50:33"
       - run:
           name: "Deploy app"
           command: |

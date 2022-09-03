@@ -1,0 +1,14 @@
+[Unit]
+Description=Google Feud
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python3 /home/gfeudadmin/discord_google_feud/main.py
+Environment=PYTHONUNBUFFERED=1
+User=gfeudadmin
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

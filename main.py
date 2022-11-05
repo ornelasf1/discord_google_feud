@@ -1,5 +1,5 @@
 import os
-import time
+import traceback
 import discord
 import asyncio
 import re
@@ -79,6 +79,7 @@ async def guess_phrase(ctx, phrase: str):
                 await ctx.send(gfeud.getGFeudBoard())
     except Exception as error:
         print(ctx, 'ERROR: Game failed, shutting down game. ', error)
+        traceback.print_exc()
         gfeud.endGame()
         await ctx.send('>>> Our bad, something might\'ve broken  :confounded:\nFeel free to report this to the support server: ' + SUPPORT_SERVER_URL)
 

@@ -19,15 +19,18 @@ help_command = commands.DefaultHelpCommand(
     no_category = 'Google Feud'
 )
 
+intents = discord.Intents.default()
+intents.message_content = True
+
 bot = commands.Bot(command_prefix=['gfeud ', 'gf ', 'Gf ', 'gF ', 'GF '], 
     description='Google Feud is a game much like Family Feud, except the phrases on the wall are Google\'s auto-complete suggestions. Guess what the auto-completes are for a given phrase to win the game!', 
-    help_command=help_command, case_insensitive=True)
+    help_command=help_command, case_insensitive=True, intents=intents)
 
 print = logger(print)
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="Under Maintenance :D"))
+    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="gf help"))
     print(f"Beep Boop I am ready to serve the humans. Currently serving {len(bot.guilds)} human gatherings")
 
 @bot.command(name='start', help='Starts a game of Google Feud')

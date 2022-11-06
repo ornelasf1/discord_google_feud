@@ -1,9 +1,10 @@
 
 # Python Environment
 Requires Python 3.9
+
 Run application with
 ```python
-py main.py
+python3.9 main.py
 ```
 
 # Graphite

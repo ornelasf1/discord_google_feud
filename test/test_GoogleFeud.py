@@ -5,6 +5,7 @@ import json
 from unittest import mock
 from unittest.mock import MagicMock, Mock
 from googlefeud.GoogleFeud import GoogleFeud
+from googlefeud.GoogleFeud import getWinners
 
 
 def mocked_requests_get(*args, **kwargs):
@@ -113,6 +114,32 @@ class TestGoogleFeud(unittest.TestCase):
         response = self.sut.getWinnerResponse()
         expected_response = ">>> **Winner** Billy.Bob  :fireworks: :100:"
         self.assertEqual(expected_response, response)
+
+    def test_get_winners(self):
+        self.sut.scores = {
+            "12345": {"score": 1000, "display_name": "Billy.Bob"},
+            "98767": {"score": 200, "display_name": "Georgy"},
+        }
+        winners = getWinners(self.sut.scores)
+
+        self.assertEqual({"Billy.Bob": 1000}, winners)
+
+    def test_get_winners_by_id(self):
+        self.sut.scores = {
+            "12345": {"score": 1000, "display_name": "Billy.Bob"},
+            "98767": {"score": 200, "display_name": "Georgy"},
+        }
+        winners = getWinners(self.sut.scores, byId=True)
+
+        self.assertEqual({"12345": 1000}, winners)
+
+        self.sut.scores = {
+            "12345": {"score": 200, "display_name": "Billy.Bob"},
+            "98767": {"score": 200, "display_name": "Georgy"},
+        }
+        winners = getWinners(self.sut.scores, byId=True)
+
+        self.assertEqual({"12345": 200, "98767": 200}, winners)
 
     def test_get_scoreboard(self):
         self.sut.scores = {

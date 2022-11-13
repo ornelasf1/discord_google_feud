@@ -21,7 +21,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 bot = commands.Bot(
-    command_prefix=["gfeud ", "gf ", "Gf ", "gF ", "GF "],
+    command_prefix=["dev "],
     description="Google Feud is a game much like Family Feud, except the phrases on the wall are Google's auto-complete suggestions. Guess what the auto-completes are for a given phrase to win the game!",
     help_command=help_command,
     case_insensitive=True,
@@ -92,6 +92,7 @@ async def guess_phrase(ctx, phrase: str):
             if gfeud.isGameOver():
                 print(ctx, f"Game over")
                 gfeud.endGame()
+                gfeud.update_winner_stats()
                 await ctx.send(gfeud.getGFeudBoard())
                 await ctx.send(gfeud.getWinnerResponse())
                 gfeud.endGame()
@@ -119,6 +120,16 @@ async def scoreboard(ctx):
         await ctx.send(response)
     else:
         await ctx.send(gfeud.getScoreboard())
+
+
+@bot.command(
+    name="stats",
+    help="Display user stats",
+    no_category="Google Feud",
+)
+async def stats(ctx):
+    gfeud = GoogleFeud(ctx)
+    await ctx.send(gfeud.show_user_stats(str(ctx.author.id)))
 
 
 @bot.command(name="review", hidden=True)

@@ -2,6 +2,7 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime
 import os
+import pymongo
 
 load_dotenv()
 MONGO_SERVER = os.getenv("MONGO_SERVER")
@@ -295,3 +296,17 @@ class GoogleFeudDB:
             return self.db.searchphrases.find_one({"phrase": phrase})
         except Exception as error:
             print("Failed to look for the given phrase: ", error)
+
+    def updateLeaderboard(self, user_id: str) -> pymongo.UpdateOne:
+        try:
+            return self.db.leaderboard.update_one(
+                {"user_id": user_id}, {"$inc": {"wins": 1}}, upsert=True
+            )
+        except Exception as error:
+            print("Failed to update leaderboard for user", user_id, error)
+
+    def getLeaderboard(self, user_ids: list[str]) -> pymongo.CursorType:
+        try:
+            return self.db.leaderboard.find({"user_id": {"$in": user_ids}})
+        except Exception as error:
+            print("Failed to get leaderboard for users", user_ids, error)

@@ -264,24 +264,7 @@ class GoogleFeud:
         return True
 
     def getWinnerResponse(self):
-        ordered_scores = dict(
-            sorted(
-                self.scores.items(),
-                key=lambda score_dict: score_dict[1]["score"],
-                reverse=True,
-            )
-        )
-        winners = {}
-        for winner_id in ordered_scores:
-            winner_name = ordered_scores[winner_id]["display_name"]
-            if len(winners) == 0:
-                winners[winner_name] = ordered_scores[winner_id]["score"]
-            else:
-                first_winner = list(winners.keys())[0]
-                if ordered_scores[winner_id]["score"] == winners[first_winner]:
-                    winners[winner_name] = ordered_scores[winner_id]["score"]
-                else:
-                    break
+        winners = getWinners(self.scores)
         plurar_winner_label = "Winners" if len(winners) > 1 else "Winner"
         winners = " - ".join(list(winners.keys()))
         if len(winners) == 0:
@@ -411,6 +394,59 @@ class GoogleFeud:
             if not user_id == None:
                 self.gfeuddb.increment_approved_contribution(user_id)
 
+    def increment_wins(self, user_id: str) -> None:
+        self.gfeuddb.updateLeaderboard(user_id)
+
+    def update_winner_stats(self) -> None:
+        winners = getWinners(self.scores, byId=True)
+        for winner in winners:
+            self.increment_wins(winner)
+
+    def get_leaderboard(self, users: list[str]) -> dict[str, str]:
+        leaderboard = {}
+        for record in self.gfeuddb.getLeaderboard(users):
+            leaderboard[record["user_id"]] = record["wins"]
+        return leaderboard
+
+    def get_wins_for_user(self, user_id: str) -> int:
+        lb = self.get_leaderboard([user_id])
+        if len(lb) != 0:
+            return int(lb[user_id])
+        else:
+            return 0
+
+    def show_user_stats(self, user_id: str):
+        times_won = self.get_wins_for_user(user_id)
+        return f">>> You've won {getEmojiNumber(times_won)} times"
+
+
+def getWinners(scores: dict, byId=False) -> dict[str, str]:
+    ordered_scores = dict(
+        sorted(
+            scores.items(),
+            key=lambda score_dict: score_dict[1]["score"],
+            reverse=True,
+        )
+    )
+    winners = {}
+    for winner_id in ordered_scores:
+        winner_name = ordered_scores[winner_id]["display_name"]
+        if len(winners) == 0:
+            if byId:
+                winners[winner_id] = ordered_scores[winner_id]["score"]
+            else:
+                winners[winner_name] = ordered_scores[winner_id]["score"]
+        else:
+            first_winner = list(winners.keys())[0]
+            if ordered_scores[winner_id]["score"] == winners[first_winner]:
+                if byId:
+                    winners[winner_id] = ordered_scores[winner_id]["score"]
+                else:
+                    winners[winner_name] = ordered_scores[winner_id]["score"]
+            else:
+                break
+    return winners
+
 
 def getEmojiScore(score):
     """
@@ -419,7 +455,7 @@ def getEmojiScore(score):
     return ":diamonds:" + getEmojiNumber(score)
 
 
-def getEmojiNumber(number, fill=False):
+def getEmojiNumber(number: int, fill=False) -> str:
     """
     Takes a number and returns emoji form string for Discord
     """

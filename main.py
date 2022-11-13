@@ -186,7 +186,7 @@ async def review_phrase(ctx):
     name="contribute",
     help="Help us out by contributing your own Google phrase\n\nFor example,\ngf contribute why do cats",
 )
-async def add_phrase(ctx, *, phrase: str):
+async def add_phrase(ctx, *, contribution_phrase: str):
     check_mark = "✅"
     x_mark = "❌"
 
@@ -197,7 +197,7 @@ async def add_phrase(ctx, *, phrase: str):
 
     gfeud = GoogleFeud(ctx)
 
-    clean_phrase = phrase.lower()
+    clean_phrase = contribution_phrase.lower()
     clean_phrase = " ".join(clean_phrase.split())
 
     if gfeud.isUserAnAdmin():
@@ -296,6 +296,8 @@ async def on_command_error(ctx, error):
         print(ctx, error)
         if "phrase" == error.param.name:
             response = ">>> Provide a phrase with that command  :wink:\n.e.g `gf a this is my answer`"
+        elif "contribution_phrase" == error.param.name:
+            response = ">>> Provide a phrase with that command  :wink:\n.e.g `gf contribute do babies come from`"
         else:
             response = f">>> Unknown command {error.param.name}. Run `gf help` for valid commands"
         await ctx.send(response)

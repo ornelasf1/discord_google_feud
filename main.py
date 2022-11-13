@@ -21,7 +21,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 bot = commands.Bot(
-    command_prefix=["dev "],
+    command_prefix=["gfeud ", "gf ", "Gf ", "gF ", "GF "],
     description="Google Feud is a game much like Family Feud, except the phrases on the wall are Google's auto-complete suggestions. Guess what the auto-completes are for a given phrase to win the game!",
     help_command=help_command,
     case_insensitive=True,

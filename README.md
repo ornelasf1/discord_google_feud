@@ -3,8 +3,7 @@ Game bot available on Discord, simply invite the bot to your server https://disc
 
 The premise of the game is to guess what Google suggest as auto-completion words. Everyone is able to participate in guessing the auto-completes. The person with the highest score wins the game! 
 
-# Demo
-![Alt text](discord_gfeud.gif)
+![gfeud demo](discord_gfeud.gif)
 
 # Python Environment
 Requires Python 3.9

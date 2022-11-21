@@ -14,7 +14,8 @@ Run application with
 python3.9 main.py
 ```
 
-# Graphite
+# Notes Dump
+## Graphite
 
 Virtual env in /opt/graphite
 
@@ -51,7 +52,7 @@ sudo apt-get install libpango1.0-0
 sudo apt-get install libcairo2
 sudo apt-get install libpq-dev
 
-## Confguring web app
+### Confguring web app
 
 https://graphite.readthedocs.io/en/latest/config-webapp.html#nginx-gunicorn
 
@@ -75,7 +76,7 @@ Error: No module named graphite.settings:
 Ran the following to fix:
 cd /opt/graphite/webapp/; PYTHONPATH=/opt/graphite/webapp django-admin.py migrate --settings=graphite.settings --run-syncdb
 
-### Configure nginx
+#### Configure nginx
 
 sudo touch /var/log/nginx/graphite.access.log
 sudo touch /var/log/nginx/graphite.error.log
@@ -86,11 +87,11 @@ sudo service nginx reload
 
 nginx file path: /etc/nginx/sites-available/graphite
 
-### Start web app
+#### Start web app
 
 sudo systemctl start graphite-web.service
 
-### Graphite on Ubuntu
+#### Graphite on Ubuntu
 https://www.digitalocean.com/community/tutorials/how-to-install-and-use-graphite-on-an-ubuntu-14-04-server
 
 DB_PASSWORD = graphite-admin
@@ -125,10 +126,10 @@ python3 -m graphyte test.count 3
 /etc/carbon/storage-aggregation.conf
 
 
-### StatsD on Ubuntu
+#### StatsD on Ubuntu
 https://www.digitalocean.com/community/tutorials/how-to-configure-statsd-to-collect-arbitrary-stats-for-graphite-on-ubuntu-14-04
 
-### Install Grafana
+#### Install Grafana
 https://grafana.com/docs/grafana/latest/installation/debian/
 
 

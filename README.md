@@ -2,7 +2,7 @@
 The premise of the game is to guess what Google suggest as auto-completion words. Everyone is able to participate in guessing the auto-completes. The person with the highest score wins the game! 
 
 # Demo
-![Alt Text](https://media.giphy.com/media/67DmtDA1B9MegOFcmZ/giphy.gif)
+![Alt text](discord_gfeud.gif)
 
 # Python Environment
 Requires Python 3.9

@@ -1,6 +1,8 @@
-import requests
 import json
+
+import requests
 from fake_useragent import UserAgent
+
 from googlefeud.GoogleFeudDB import GoogleFeudDB
 from googlefeud.LoggerPrint import logger
 
@@ -58,7 +60,7 @@ class GoogleFeud:
             + "+ "
         )
         ua = UserAgent()
-        headers = {"user-agent": ua.chrome}
+        headers = {"user-agent": ua.random}
         response = requests.get(url, headers=headers, verify=False)
         suggestions = json.loads(response.text)
         lower_phrase = phrase.lower()

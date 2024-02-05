@@ -2,7 +2,7 @@
 
 PUSHBULLET_TOKEN=""
 
-DB_LOG_FILE=/home/gfeudadmin/mongodb_down.log
+DB_LOG_FILE=$HOME/mongodb_down.log
 DB_OUTPUT=$(service mongod status)
 DB_STATUS=$?
 if [[ $DB_STATUS -ne 0 ]] && [ ! -f "$DB_LOG_FILE"  ]; then
@@ -15,7 +15,7 @@ elif [[ $DB_STATUS -eq 0 ]] && [ -f "$DB_LOG_FILE" ]; then
 fi
 
 
-APP_LOG_FILE=/home/gfeudadmin/gfeud_down.log
+APP_LOG_FILE=$HOME/gfeud_down.log
 APP_OUTPUT=$(service gfeud status)
 APP_STATUS=$?
 if [[ $APP_STATUS -ne 0 ]] && [ ! -f "$APP_LOG_FILE"  ]; then

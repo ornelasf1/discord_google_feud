@@ -106,7 +106,6 @@ async def guess_phrase(ctx, phrase: str):
                 await ctx.send(gfeud.getGFeudBoard())
         secondsToRun = monotonic() - start_time
         appMetrics.recordPhraseGuessTime(ctx, secondsToRun)
-        raise NameError("Bad error!")
     except Exception as error:
         print(ctx, "ERROR: Game failed, shutting down game. ", error)
         traceback.print_exc()

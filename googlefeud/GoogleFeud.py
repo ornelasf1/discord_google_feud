@@ -233,7 +233,7 @@ class GoogleFeud:
                 )
                 self.gfeuddb.updateSuggestionSolved(suggestion, guesser_id)
                 self.statusMessage = f":clap:  Great answer, {guesser}! {self.suggestions[suggestion]['score']} points for you  :partying_face:"
-                self.appMetrics.phraseGiven(self.ctx, {'phrase': guess})
+                self.appMetrics.phraseGiven(self.ctx, {'answer': guess, 'prompt': self.phrase})
                 self.appMetrics.answerGiven(discord_ctx=self.ctx)
                 return True
             elif foundMatch and self.suggestions[suggestion]["solved"]:
@@ -250,7 +250,7 @@ class GoogleFeud:
         self.statusMessage = (
             f"No auto-complete found with the phrase, *{guess}*  :sweat:"
         )
-        self.appMetrics.phraseGiven(self.ctx, {'phrase': guess})
+        self.appMetrics.phraseGiven(self.ctx, {'answer': guess, 'prompt': self.phrase})
         self.appMetrics.answerGiven(discord_ctx=self.ctx)
         return False
 

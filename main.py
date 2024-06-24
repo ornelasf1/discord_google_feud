@@ -2,12 +2,15 @@ import asyncio
 import os
 import re
 import traceback
+from time import monotonic
 
 import discord
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound, MissingRequiredArgument
 from dotenv import load_dotenv
+from prometheus_client import start_http_server
 
+from googlefeud.AppMetrics import AppMetrics
 from googlefeud.GoogleFeud import GoogleFeud
 from googlefeud.LoggerPrint import logger
 
@@ -31,6 +34,7 @@ bot = commands.Bot(
 
 print = logger(print)
 
+appMetrics = AppMetrics()
 
 @bot.event
 async def on_ready():
@@ -45,7 +49,7 @@ async def on_ready():
 @bot.command(name="start", help="Starts a game of Google Feud")
 async def start_game(ctx):
     try:
-        gfeud = GoogleFeud(ctx)
+        gfeud = GoogleFeud(ctx, appMetrics)
         gfeud.loadSession()
         gfeud.startGame()
     except RuntimeError as error:
@@ -58,7 +62,7 @@ async def start_game(ctx):
 
 @bot.command(name="end", help="Ends a game of Google Feud")
 async def end_game(ctx):
-    gfeud = GoogleFeud(ctx)
+    gfeud = GoogleFeud(ctx, appMetrics)
     gfeud.loadSession()
 
     if gfeud.endGame():
@@ -79,7 +83,8 @@ async def end_game(ctx):
 )
 async def guess_phrase(ctx, phrase: str):
     try:
-        gfeud = GoogleFeud(ctx)
+        start_time = monotonic()
+        gfeud = GoogleFeud(ctx, appMetrics)
         if not gfeud.loadSession():
             print(ctx, f"Game hasn't started yet")
             response = (
@@ -99,6 +104,9 @@ async def guess_phrase(ctx, phrase: str):
                 gfeud.endGame()
             else:
                 await ctx.send(gfeud.getGFeudBoard())
+        secondsToRun = monotonic() - start_time
+        appMetrics.recordPhraseGuessTime(ctx, secondsToRun)
+        raise NameError("Bad error!")
     except Exception as error:
         print(ctx, "ERROR: Game failed, shutting down game. ", error)
         traceback.print_exc()
@@ -107,6 +115,7 @@ async def guess_phrase(ctx, phrase: str):
             ">>> Our bad, something might've broken  :confounded:\nFeel free to report this to the support server: "
             + SUPPORT_SERVER_URL
         )
+        appMetrics.recordFatalException(ctx, {'exception':str(error)})
 
 
 @bot.command(
@@ -115,7 +124,7 @@ async def guess_phrase(ctx, phrase: str):
     no_category="Google Feud",
 )
 async def scoreboard(ctx):
-    gfeud = GoogleFeud(ctx)
+    gfeud = GoogleFeud(ctx, appMetrics)
     if not gfeud.loadSession():
         response = ">>> Game has not started :bangbang:\nStart a game with `gf start`"
         await ctx.send(response)
@@ -129,7 +138,7 @@ async def scoreboard(ctx):
     no_category="Google Feud",
 )
 async def stats(ctx):
-    gfeud = GoogleFeud(ctx)
+    gfeud = GoogleFeud(ctx, appMetrics)
     await ctx.send(gfeud.show_user_stats(str(ctx.author.id)))
 
 
@@ -143,7 +152,7 @@ async def review_phrase(ctx):
             reaction.emoji == check_mark or reaction.emoji == x_mark
         )
 
-    gfeud = GoogleFeud(ctx)
+    gfeud = GoogleFeud(ctx, appMetrics)
     if gfeud.isUserAnAdmin():
         response, contribution = gfeud.getSuggestionsFromContribution()
         if response == None:
@@ -196,7 +205,7 @@ async def add_phrase(ctx, *, contribution_phrase: str):
             reaction.emoji == check_mark or reaction.emoji == x_mark
         )
 
-    gfeud = GoogleFeud(ctx)
+    gfeud = GoogleFeud(ctx, appMetrics)
 
     clean_phrase = contribution_phrase.lower()
     clean_phrase = " ".join(clean_phrase.split())
@@ -319,4 +328,5 @@ async def on_message(message):
 
 
 if __name__ == "__main__":
+    start_http_server(9000)
     bot.run(TOKEN)

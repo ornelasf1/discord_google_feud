@@ -3,6 +3,7 @@ import json
 import requests
 from fake_useragent import UserAgent
 
+from googlefeud.AppMetrics import AppMetrics
 from googlefeud.GoogleFeudDB import GoogleFeudDB
 from googlefeud.LoggerPrint import logger
 
@@ -12,7 +13,7 @@ meaningless_phrases = ["a", "the", "of", "by", "so", "too", "your", "me", "my"]
 
 
 class GoogleFeud:
-    def __init__(self, ctx):
+    def __init__(self, ctx, appMetrics: AppMetrics):
         self.ctx = ctx
         self.gfeuddb = GoogleFeudDB(str(ctx.guild), str(ctx.channel))
         self.guild = ctx.guild
@@ -23,6 +24,7 @@ class GoogleFeud:
         self.statusMessage = ""
         self.turns = 0
         self.game_ended = False
+        self.appMetrics = appMetrics
 
     def startGame(self):
         """
@@ -41,6 +43,7 @@ class GoogleFeud:
                 self.ctx,
                 "Auto-completes to guess: " + ", ".join(list(self.suggestions.keys())),
             )
+            self.appMetrics.gameStarted(self.ctx)
         else:
             self.statusMessage = "Game is in progress!"
 
@@ -230,12 +233,16 @@ class GoogleFeud:
                 )
                 self.gfeuddb.updateSuggestionSolved(suggestion, guesser_id)
                 self.statusMessage = f":clap:  Great answer, {guesser}! {self.suggestions[suggestion]['score']} points for you  :partying_face:"
+                self.appMetrics.phraseGiven(self.ctx, {'phrase': guess})
+                self.appMetrics.answerGiven(discord_ctx=self.ctx)
                 return True
             elif foundMatch and self.suggestions[suggestion]["solved"]:
                 print(self.ctx, f"'{guess}' was already guessed correctly before")
                 self.statusMessage = f"Answer with the phrase *{guess}* has already been given  :face_with_symbols_over_mouth:"
                 self.gfeuddb.updateTurn()
                 self.turns -= 1
+                self.appMetrics.phraseGiven(self.ctx, {'phrase': guess})
+                self.appMetrics.answerGiven(discord_ctx=self.ctx)
                 return True
         print(self.ctx, f"'{guess}' did not match any auto-completes")
         self.gfeuddb.updateTurn()
@@ -243,6 +250,8 @@ class GoogleFeud:
         self.statusMessage = (
             f"No auto-complete found with the phrase, *{guess}*  :sweat:"
         )
+        self.appMetrics.phraseGiven(self.ctx, {'phrase': guess})
+        self.appMetrics.answerGiven(discord_ctx=self.ctx)
         return False
 
     def isGuessInPhrase(self, guess, suggestion):

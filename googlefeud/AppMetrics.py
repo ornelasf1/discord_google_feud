@@ -9,7 +9,7 @@ class AppMetrics():
         self.provided_guess_phrase = Info('gfeud_provided_guess_phrase', 'Info about the phrase that was given', labels)
         self.guess_phrase = Summary('gfeud_guess_phrase', 'Summary about the guess phrase', labels)
         self.exception_occurred = Info('gfeud_exception_occurred', 'Info about fatal exception', labels)
-        self.active_servers = Gauge('gfeud_active_servers', 'Gauge of active servers with the bot invited', labels)
+        self.active_servers = Gauge('gfeud_active_servers', 'Gauge of active servers with the bot invited')
 
     def gameStarted(self, discord_ctx):
         self.game_start.labels(discord_ctx.author.name, discord_ctx.author.id, discord_ctx.guild, discord_ctx.channel).inc()

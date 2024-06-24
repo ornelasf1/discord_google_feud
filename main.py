@@ -44,6 +44,7 @@ async def on_ready():
     print(
         f"Beep Boop I am ready to serve the humans. Currently serving {len(bot.guilds)} human gatherings"
     )
+    appMetrics.setActiveServerCount(len(bot.guilds))
 
 
 @bot.command(name="start", help="Starts a game of Google Feud")
@@ -324,6 +325,7 @@ async def on_message(message):
         print(message, message.content)
 
     await bot.process_commands(message)
+    appMetrics.setActiveServerCount(len(bot.guilds))
 
 
 if __name__ == "__main__":

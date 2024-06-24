@@ -241,7 +241,7 @@ class GoogleFeud:
                 self.statusMessage = f"Answer with the phrase *{guess}* has already been given  :face_with_symbols_over_mouth:"
                 self.gfeuddb.updateTurn()
                 self.turns -= 1
-                self.appMetrics.phraseGiven(self.ctx, {'phrase': guess})
+                self.appMetrics.phraseGiven(self.ctx, {'answer': guess, 'prompt': self.phrase})
                 self.appMetrics.answerGiven(discord_ctx=self.ctx)
                 return True
         print(self.ctx, f"'{guess}' did not match any auto-completes")
